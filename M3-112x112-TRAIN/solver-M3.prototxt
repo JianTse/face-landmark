@@ -1,0 +1,14 @@
+net : "./M3_train_test_h5.prototxt"
+# The base learning rate, momentum and the weight decay of the network.
+test_iter: 950
+test_interval: 6000
+base_lr: 0.001
+momentum: 0.9
+momentum2: 0.999
+type: "Adam"
+lr_policy: "fixed"
+display: 100
+max_iter: 3500000
+snapshot: 10000
+snapshot_prefix: "./model/M3"
+solver_mode: GPU
