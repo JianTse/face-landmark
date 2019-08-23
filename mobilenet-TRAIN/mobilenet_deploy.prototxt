@@ -1,0 +1,584 @@
+name: "MobileNetV1-3"
+
+#################### Input ####################
+layer {
+  name: "data"
+  type: "Input"
+  top: "data"
+  input_param { shape: { dim: 1 dim: 3 dim: 112 dim: 112 } }
+}
+
+#################### conv1 ####################
+layer{
+    name: "conv1"
+    type: "Convolution"
+    bottom: "data"
+    top: "conv1"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 32
+        kernel_size: 3
+        stride: 1
+        pad: 1
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+# N, 32, 112, 112
+
+layer{
+    name: "conv1/bn"
+    type: "BatchNorm"
+    bottom: "conv1"
+    top: "conv1/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "conv1/scale"
+    type: "Scale"
+    bottom: "conv1/bn"
+    top: "conv1/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "conv1/relu"
+    type: "ReLU"
+    bottom: "conv1/scale"
+    top: "conv1/relu"
+}
+# N, 32, 112, 112
+
+#################### pool1 ####################
+layer{
+    name: "pool1"
+    type: "Pooling"
+    bottom: "conv1/relu"
+    top: "pool1"
+    pooling_param{
+        pool: MAX
+        kernel_size: 3
+        stride: 2
+        pad: 1
+    }
+}
+
+#N, 32, 57, 57
+
+#################### depthwise1 ####################
+layer{
+    name: "depthwise1"
+    type: "Convolution"
+    bottom: "pool1"
+    top: "depthwise1"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 32
+        group: 32
+        kernel_size: 3
+        stride: 2
+        pad: 1
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+#N, 32, 29, 29
+
+layer{
+    name: "depthwise1/bn"
+    type: "BatchNorm"
+    bottom: "depthwise1"
+    top: "depthwise1/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "depthwise1/scale"
+    type: "Scale"
+    bottom: "depthwise1/bn"
+    top: "depthwise1/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "depthwise1/relu"
+    type: "ReLU"
+    bottom: "depthwise1/scale"
+    top: "depthwise1/relu"
+}
+#N, 32, 29, 29
+
+#################### conv1x1_1 ####################
+layer{
+    name: "conv1x1_1"
+    type: "Convolution"
+    bottom: "depthwise1/relu"
+    top: "conv1x1_1"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 64
+        kernel_size: 1
+        stride: 1
+        pad: 0
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+
+# N, 64, 29, 29
+
+layer{
+    name: "conv1x1_1/bn"
+    type: "BatchNorm"
+    bottom: "conv1x1_1"
+    top: "conv1x1_1/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "conv1x1_1/scale"
+    type: "Scale"
+    bottom: "conv1x1_1/bn"
+    top: "conv1x1_1/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "conv1x1_1/relu"
+    type: "ReLU"
+    bottom: "conv1x1_1/scale"
+    top: "conv1x1_1/relu"
+}
+# N, 64, 29, 29
+
+#################### depthwise2 ####################
+layer{
+    name: "depthwise2"
+    type: "Convolution"
+    bottom: "conv1x1_1/relu"
+    top: "depthwise2"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 64
+        group: 64
+        kernel_size: 3
+        stride: 2
+        pad: 1
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+#N, 64, 15, 15
+
+layer{
+    name: "depthwise2/bn"
+    type: "BatchNorm"
+    bottom: "depthwise2"
+    top: "depthwise2/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "depthwise2/scale"
+    type: "Scale"
+    bottom: "depthwise2/bn"
+    top: "depthwise2/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "depthwise2/relu"
+    type: "ReLU"
+    bottom: "depthwise2/scale"
+    top: "depthwise2/relu"
+}
+#N, 64, 15, 15
+
+#################### conv1x1_2 ####################
+layer{
+    name: "conv1x1_2"
+    type: "Convolution"
+    bottom: "depthwise2/relu"
+    top: "conv1x1_2"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 128
+        kernel_size: 1
+        stride: 1
+        pad: 0
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+
+# N, 128, 15, 15
+
+layer{
+    name: "conv1x1_2/bn"
+    type: "BatchNorm"
+    bottom: "conv1x1_2"
+    top: "conv1x1_2/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "conv1x1_2/scale"
+    type: "Scale"
+    bottom: "conv1x1_2/bn"
+    top: "conv1x1_2/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "conv1x1_2/relu"
+    type: "ReLU"
+    bottom: "conv1x1_2/scale"
+    top: "conv1x1_2/relu"
+}
+# N, 128, 15, 15
+
+#################### depthwise3 ####################
+layer{
+    name: "depthwise3"
+    type: "Convolution"
+    bottom: "conv1x1_2/relu"
+    top: "depthwise3"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 128
+        group: 128
+        kernel_size: 3
+        stride: 2
+        pad: 1
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+#N, 128, 8, 8
+
+layer{
+    name: "depthwise3/bn"
+    type: "BatchNorm"
+    bottom: "depthwise3"
+    top: "depthwise3/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "depthwise3/scale"
+    type: "Scale"
+    bottom: "depthwise3/bn"
+    top: "depthwise3/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "depthwise3/relu"
+    type: "ReLU"
+    bottom: "depthwise3/scale"
+    top: "depthwise3/relu"
+}
+#N, 128, 8, 8
+
+#################### conv1x1_3 ####################
+layer{
+    name: "conv1x1_3"
+    type: "Convolution"
+    bottom: "depthwise3/relu"
+    top: "conv1x1_3"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 256
+        kernel_size: 1
+        stride: 1
+        pad: 0
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+
+# N, 256, 8, 8
+
+layer{
+    name: "conv1x1_3/bn"
+    type: "BatchNorm"
+    bottom: "conv1x1_3"
+    top: "conv1x1_3/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "conv1x1_3/scale"
+    type: "Scale"
+    bottom: "conv1x1_3/bn"
+    top: "conv1x1_3/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "conv1x1_3/relu"
+    type: "ReLU"
+    bottom: "conv1x1_3/scale"
+    top: "conv1x1_3/relu"
+}
+# N, 256, 8, 8
+
+#################### depthwise4 ####################
+layer{
+    name: "depthwise4"
+    type: "Convolution"
+    bottom: "conv1x1_3/relu"
+    top: "depthwise4"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 256
+        group: 256
+        kernel_size: 3
+        stride: 2
+        pad: 1
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+#N, 256, 4, 4
+
+layer{
+    name: "depthwise4/bn"
+    type: "BatchNorm"
+    bottom: "depthwise4"
+    top: "depthwise4/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "depthwise4/scale"
+    type: "Scale"
+    bottom: "depthwise4/bn"
+    top: "depthwise4/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "depthwise4/relu"
+    type: "ReLU"
+    bottom: "depthwise4/scale"
+    top: "depthwise4/relu"
+}
+#N, 256, 4, 4
+
+#################### conv1x1_4 ####################
+layer{
+    name: "conv1x1_4"
+    type: "Convolution"
+    bottom: "depthwise4/relu"
+    top: "conv1x1_4"
+    param{
+        lr_mult: 1
+    }
+    param{
+        lr_mult: 2
+    }
+    convolution_param{
+        num_output: 254
+        kernel_size: 1
+        stride: 1
+        pad: 0
+        weight_filler:{
+            type: "xavier"
+        }
+        bias_filler{
+            type: "constant"
+        }
+
+    }
+}
+
+# N, 254, 4, 4
+
+layer{
+    name: "conv1x1_4/bn"
+    type: "BatchNorm"
+    bottom: "conv1x1_4"
+    top: "conv1x1_4/bn"
+    batch_norm_param{
+        use_global_stats: true
+        moving_average_fraction: 0.997
+        eps: 1e-3
+    }
+}
+
+layer{
+    name: "conv1x1_4/scale"
+    type: "Scale"
+    bottom: "conv1x1_4/bn"
+    top: "conv1x1_4/scale"
+    scale_param{
+        bias_term: true
+    }
+}
+
+layer{
+    name: "conv1x1_4/relu"
+    type: "ReLU"
+    bottom: "conv1x1_4/scale"
+    top: "conv1x1_4/relu"
+}
+# N, 254, 4, 4
+
+#################### global average pool ####################
+layer{
+    name: "global_avepool"
+    type: "Pooling"
+    bottom: "conv1x1_4/relu"
+    top: "global_avepool"
+    pooling_param{
+        pool: AVE
+        global_pooling: true
+    }
+}
+# N, 254, 1, 1
+
+#################### landmark_pred ####################
+
+layer{
+    name: "landmark_pred"
+    type: "Reshape"
+    bottom: "global_avepool"
+    top: "landmark_pred"
+    reshape_param{
+        shape{
+            dim: 0
+            dim: -1
+        }
+    }
+}
+# N, 254
