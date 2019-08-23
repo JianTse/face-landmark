@@ -1,0 +1,384 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="mtcnn">
+      <UniqueIdentifier>{1d0964b5-7651-4806-806a-ffcdfedfd9ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cnn">
+      <UniqueIdentifier>{102eb6ce-bebe-4e85-ad53-a0109e8b3e63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cnn\include">
+      <UniqueIdentifier>{4d0d1397-d163-481b-8bfc-bbd984ff36cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{1251ace1-fb9d-44ae-a2d3-d1da55a762c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spoof">
+      <UniqueIdentifier>{a07f472f-59e6-4e88-8105-72af7fa3cab9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="landmark">
+      <UniqueIdentifier>{a19c3582-b1cd-49cf-aa0a-1a45255d1b0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="landmark\sdm">
+      <UniqueIdentifier>{2b0968a2-8346-48d4-b7c7-de2894f0cee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="poseEst">
+      <UniqueIdentifier>{025ddfb5-5f91-48ae-a951-ce58478ba37e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="landmark\pdm">
+      <UniqueIdentifier>{72a51ba5-3677-4e2d-9663-812271ba2d05}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+    <Text Include="sdm\license.txt">
+      <Filter>landmark\sdm</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mtcnn_facedetect\mtcnn_opencv.h">
+      <Filter>mtcnn</Filter>
+    </ClInclude>
+    <ClInclude Include="mtcnn_facedetect\mtcnn_ncnn.h">
+      <Filter>mtcnn</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\allocator.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\benchmark.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\blob.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\command.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\cpu.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\gpu.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\layer.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\layer_type.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\layer_type_enum.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\mat.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\modelbin.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\net.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\opencv.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\paramdict.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\pipeline.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="cnn\include\platform.h">
+      <Filter>cnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="util\common.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\recttools.hpp">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="spoof\spoofOpticalFlow.h">
+      <Filter>spoof</Filter>
+    </ClInclude>
+    <ClInclude Include="spoof\spoofNirDepth.h">
+      <Filter>spoof</Filter>
+    </ClInclude>
+    <ClInclude Include="spoof\spoofByModel.h">
+      <Filter>spoof</Filter>
+    </ClInclude>
+    <ClInclude Include="ldmark\shufflenet_ncnn.h">
+      <Filter>landmark</Filter>
+    </ClInclude>
+    <ClInclude Include="ldmark\m3_ncnn.h">
+      <Filter>landmark</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\access.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\adapters.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\array.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\base_class.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\base64.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\binary.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\bitset.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\boost_variant.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\cereal.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\chrono.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\common.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\complex.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\deque.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\document.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\feature_descriptor.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\filestream.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\forward_list.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\genericstream.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\helper.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\helpers.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\hog.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\json.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\ldmarkmodel.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\list.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\macros.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\map.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\mat_cerealisation.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\mat_serialization.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\memory.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\polymorphic.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\polymorphic_impl.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\portable_binary.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\pow10.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\prettywriter.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\queue.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\rapidjson.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\rapidxml.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\rapidxml_iterators.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\rapidxml_print.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\rapidxml_utils.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\reader.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\set.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\stack.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\stack.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\static_object.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\strfunc.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\string.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\stringbuffer.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\ThreadPool.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\traits.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\tuple.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\unordered_map.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\unordered_set.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\util.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\utility.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\vector.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\writer.h">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="sdm\xml.hpp">
+      <Filter>landmark\sdm</Filter>
+    </ClInclude>
+    <ClInclude Include="pdm\LandmarkDetectorParameters.h">
+      <Filter>landmark\pdm</Filter>
+    </ClInclude>
+    <ClInclude Include="pdm\LandmarkDetectorUtils.h">
+      <Filter>landmark\pdm</Filter>
+    </ClInclude>
+    <ClInclude Include="pdm\PDM.h">
+      <Filter>landmark\pdm</Filter>
+    </ClInclude>
+    <ClInclude Include="pdm\pdmHelper.h">
+      <Filter>landmark\pdm</Filter>
+    </ClInclude>
+    <ClInclude Include="pdm\RotationHelpers.h">
+      <Filter>landmark\pdm</Filter>
+    </ClInclude>
+    <ClInclude Include="poseEst\poseEst.h">
+      <Filter>poseEst</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mtcnn_facedetect\mtcnn_opencv.cpp">
+      <Filter>mtcnn</Filter>
+    </ClCompile>
+    <ClCompile Include="mtcnn_facedetect\mtcnn_ncnn.cpp">
+      <Filter>mtcnn</Filter>
+    </ClCompile>
+    <ClCompile Include="util\common.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="spoof\spoofOpticalFlow.cpp">
+      <Filter>spoof</Filter>
+    </ClCompile>
+    <ClCompile Include="spoof\spoofNirDepth.cpp">
+      <Filter>spoof</Filter>
+    </ClCompile>
+    <ClCompile Include="spoof\spoofByModel.cpp">
+      <Filter>spoof</Filter>
+    </ClCompile>
+    <ClCompile Include="ldmark\shufflenet_ncnn.cpp">
+      <Filter>landmark</Filter>
+    </ClCompile>
+    <ClCompile Include="ldmark\m3_ncnn.cpp">
+      <Filter>landmark</Filter>
+    </ClCompile>
+    <ClCompile Include="sdm\feature_descriptor.cpp">
+      <Filter>landmark\sdm</Filter>
+    </ClCompile>
+    <ClCompile Include="sdm\helper.cpp">
+      <Filter>landmark\sdm</Filter>
+    </ClCompile>
+    <ClCompile Include="sdm\hog.cpp">
+      <Filter>landmark\sdm</Filter>
+    </ClCompile>
+    <ClCompile Include="sdm\ldmarkmodel.cpp">
+      <Filter>landmark\sdm</Filter>
+    </ClCompile>
+    <ClCompile Include="pdm\LandmarkDetectorParameters.cpp">
+      <Filter>landmark\pdm</Filter>
+    </ClCompile>
+    <ClCompile Include="pdm\LandmarkDetectorUtils.cpp">
+      <Filter>landmark\pdm</Filter>
+    </ClCompile>
+    <ClCompile Include="pdm\PDM.cpp">
+      <Filter>landmark\pdm</Filter>
+    </ClCompile>
+    <ClCompile Include="pdm\pdmHelper.cpp">
+      <Filter>landmark\pdm</Filter>
+    </ClCompile>
+    <ClCompile Include="poseEst\poseEst.cpp">
+      <Filter>poseEst</Filter>
+    </ClCompile>
+    <ClCompile Include="ldmarkTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

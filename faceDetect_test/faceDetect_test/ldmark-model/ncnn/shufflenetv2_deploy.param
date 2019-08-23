@@ -1,0 +1,260 @@
+7767517
+258 274
+Input            data             0 1 data 0=112 1=112 2=3
+Convolution      conv1            1 1 data conv1 0=24 1=3 2=1 3=2 4=1 5=0 6=648
+BatchNorm        conv1_bn         1 1 conv1 conv1_conv1_bn 0=24
+Scale            conv1_scale      1 1 conv1_conv1_bn conv1_conv1_scale 0=24 1=1
+ReLU             conv1_relu       1 1 conv1_conv1_scale conv1_conv1_relu
+Pooling          pool1            1 1 conv1_conv1_relu pool1 0=0 1=3 2=2 3=0 4=0
+Split            splitncnn_0      1 2 pool1 pool1_splitncnn_0 pool1_splitncnn_1
+ConvolutionDepthWise branch1_1_conv1  1 1 pool1_splitncnn_1 branch1_1_conv1 0=24 1=3 2=1 3=2 4=1 5=0 6=216 7=24
+BatchNorm        branch1_1_conv1_bn 1 1 branch1_1_conv1 branch1_1_conv1_branch1_1_conv1_bn 0=24
+Scale            branch1_1_conv1_scale 1 1 branch1_1_conv1_branch1_1_conv1_bn branch1_1_conv1_branch1_1_conv1_scale 0=24 1=1
+Convolution      branch1_1_conv2  1 1 branch1_1_conv1_branch1_1_conv1_scale branch1_1_conv2 0=58 1=1 2=1 3=1 4=0 5=0 6=1392
+BatchNorm        branch1_1_conv2_bn 1 1 branch1_1_conv2 branch1_1_conv2_branch1_1_conv2_bn 0=58
+Scale            branch1_1_conv2_scale 1 1 branch1_1_conv2_branch1_1_conv2_bn branch1_1_conv2_branch1_1_conv2_scale 0=58 1=1
+ReLU             branch1_1_conv2_relu 1 1 branch1_1_conv2_branch1_1_conv2_scale branch1_1_conv2_branch1_1_conv2_relu
+Convolution      branch1_2_conv1  1 1 pool1_splitncnn_0 branch1_2_conv1 0=58 1=1 2=1 3=1 4=0 5=0 6=1392
+BatchNorm        branch1_2_conv1_bn 1 1 branch1_2_conv1 branch1_2_conv1_branch1_2_conv1_bn 0=58
+Scale            branch1_2_conv1_scale 1 1 branch1_2_conv1_branch1_2_conv1_bn branch1_2_conv1_branch1_2_conv1_scale 0=58 1=1
+ReLU             branch1_2_conv1_relu 1 1 branch1_2_conv1_branch1_2_conv1_scale branch1_2_conv1_branch1_2_conv1_relu
+ConvolutionDepthWise branch1_2_conv2  1 1 branch1_2_conv1_branch1_2_conv1_relu branch1_2_conv2 0=58 1=3 2=1 3=2 4=1 5=0 6=522 7=58
+BatchNorm        branch1_2_conv2_bn 1 1 branch1_2_conv2 branch1_2_conv2_branch1_2_conv2_bn 0=58
+Scale            branch1_2_conv2_scale 1 1 branch1_2_conv2_branch1_2_conv2_bn branch1_2_conv2_branch1_2_conv2_scale 0=58 1=1
+Convolution      branch1_2_conv3  1 1 branch1_2_conv2_branch1_2_conv2_scale branch1_2_conv3 0=58 1=1 2=1 3=1 4=0 5=0 6=3364
+BatchNorm        branch1_2_conv3_bn 1 1 branch1_2_conv3 branch1_2_conv3_branch1_2_conv3_bn 0=58
+Scale            branch1_2_conv3_scale 1 1 branch1_2_conv3_branch1_2_conv3_bn branch1_2_conv3_branch1_2_conv3_scale 0=58 1=1
+ReLU             branch1_2_conv3_relu 1 1 branch1_2_conv3_branch1_2_conv3_scale branch1_2_conv3_branch1_2_conv3_relu
+Concat           concat1          2 1 branch1_1_conv2_branch1_1_conv2_relu branch1_2_conv3_branch1_2_conv3_relu concat1 0=0
+ShuffleChannel   shuffle1         1 1 concat1 shuffle1 0=2
+Slice            slice2           1 2 shuffle1 branch2_1 branch2_2 -23300=2,58,-233 1=0
+Convolution      branch2_2_conv1  1 1 branch2_2 branch2_2_conv1 0=58 1=1 2=1 3=1 4=0 5=0 6=3364
+BatchNorm        branch2_2_conv1_bn 1 1 branch2_2_conv1 branch2_2_conv1_branch2_2_conv1_bn 0=58
+Scale            branch2_2_conv1_scale 1 1 branch2_2_conv1_branch2_2_conv1_bn branch2_2_conv1_branch2_2_conv1_scale 0=58 1=1
+ReLU             branch2_2_conv1_relu 1 1 branch2_2_conv1_branch2_2_conv1_scale branch2_2_conv1_branch2_2_conv1_relu
+ConvolutionDepthWise branch2_2_conv2  1 1 branch2_2_conv1_branch2_2_conv1_relu branch2_2_conv2 0=58 1=3 2=1 3=1 4=1 5=0 6=522 7=58
+BatchNorm        branch2_2_conv2_bn 1 1 branch2_2_conv2 branch2_2_conv2_branch2_2_conv2_bn 0=58
+Scale            branch2_2_conv2_scale 1 1 branch2_2_conv2_branch2_2_conv2_bn branch2_2_conv2_branch2_2_conv2_scale 0=58 1=1
+Convolution      branch2_2_conv3  1 1 branch2_2_conv2_branch2_2_conv2_scale branch2_2_conv3 0=58 1=1 2=1 3=1 4=0 5=0 6=3364
+BatchNorm        branch2_2_conv3_bn 1 1 branch2_2_conv3 branch2_2_conv3_branch2_2_conv3_bn 0=58
+Scale            branch2_2_conv3_scale 1 1 branch2_2_conv3_branch2_2_conv3_bn branch2_2_conv3_branch2_2_conv3_scale 0=58 1=1
+ReLU             branch2_2_conv3_relu 1 1 branch2_2_conv3_branch2_2_conv3_scale branch2_2_conv3_branch2_2_conv3_relu
+Concat           concat2          2 1 branch2_1 branch2_2_conv3_branch2_2_conv3_relu concat2 0=0
+ShuffleChannel   shuffle2         1 1 concat2 shuffle2 0=2
+Slice            slice3           1 2 shuffle2 branch3_1 branch3_2 -23300=2,58,-233 1=0
+Convolution      branch3_2_conv1  1 1 branch3_2 branch3_2_conv1 0=58 1=1 2=1 3=1 4=0 5=0 6=3364
+BatchNorm        branch3_2_conv1_bn 1 1 branch3_2_conv1 branch3_2_conv1_branch3_2_conv1_bn 0=58
+Scale            branch3_2_conv1_scale 1 1 branch3_2_conv1_branch3_2_conv1_bn branch3_2_conv1_branch3_2_conv1_scale 0=58 1=1
+ReLU             branch3_2_conv1_relu 1 1 branch3_2_conv1_branch3_2_conv1_scale branch3_2_conv1_branch3_2_conv1_relu
+ConvolutionDepthWise branch3_2_conv2  1 1 branch3_2_conv1_branch3_2_conv1_relu branch3_2_conv2 0=58 1=3 2=1 3=1 4=1 5=0 6=522 7=58
+BatchNorm        branch3_2_conv2_bn 1 1 branch3_2_conv2 branch3_2_conv2_branch3_2_conv2_bn 0=58
+Scale            branch3_2_conv2_scale 1 1 branch3_2_conv2_branch3_2_conv2_bn branch3_2_conv2_branch3_2_conv2_scale 0=58 1=1
+Convolution      branch3_2_conv3  1 1 branch3_2_conv2_branch3_2_conv2_scale branch3_2_conv3 0=58 1=1 2=1 3=1 4=0 5=0 6=3364
+BatchNorm        branch3_2_conv3_bn 1 1 branch3_2_conv3 branch3_2_conv3_branch3_2_conv3_bn 0=58
+Scale            branch3_2_conv3_scale 1 1 branch3_2_conv3_branch3_2_conv3_bn branch3_2_conv3_branch3_2_conv3_scale 0=58 1=1
+ReLU             branch3_2_conv3_relu 1 1 branch3_2_conv3_branch3_2_conv3_scale branch3_2_conv3_branch3_2_conv3_relu
+Concat           concat3          2 1 branch3_1 branch3_2_conv3_branch3_2_conv3_relu concat3 0=0
+ShuffleChannel   shuffle3         1 1 concat3 shuffle3 0=2
+Slice            slice4           1 2 shuffle3 branch4_1 branch4_2 -23300=2,58,-233 1=0
+Convolution      branch4_2_conv1  1 1 branch4_2 branch4_2_conv1 0=58 1=1 2=1 3=1 4=0 5=0 6=3364
+BatchNorm        branch4_2_conv1_bn 1 1 branch4_2_conv1 branch4_2_conv1_branch4_2_conv1_bn 0=58
+Scale            branch4_2_conv1_scale 1 1 branch4_2_conv1_branch4_2_conv1_bn branch4_2_conv1_branch4_2_conv1_scale 0=58 1=1
+ReLU             branch4_2_conv1_relu 1 1 branch4_2_conv1_branch4_2_conv1_scale branch4_2_conv1_branch4_2_conv1_relu
+ConvolutionDepthWise branch4_2_conv2  1 1 branch4_2_conv1_branch4_2_conv1_relu branch4_2_conv2 0=58 1=3 2=1 3=1 4=1 5=0 6=522 7=58
+BatchNorm        branch4_2_conv2_bn 1 1 branch4_2_conv2 branch4_2_conv2_branch4_2_conv2_bn 0=58
+Scale            branch4_2_conv2_scale 1 1 branch4_2_conv2_branch4_2_conv2_bn branch4_2_conv2_branch4_2_conv2_scale 0=58 1=1
+Convolution      branch4_2_conv3  1 1 branch4_2_conv2_branch4_2_conv2_scale branch4_2_conv3 0=58 1=1 2=1 3=1 4=0 5=0 6=3364
+BatchNorm        branch4_2_conv3_bn 1 1 branch4_2_conv3 branch4_2_conv3_branch4_2_conv3_bn 0=58
+Scale            branch4_2_conv3_scale 1 1 branch4_2_conv3_branch4_2_conv3_bn branch4_2_conv3_branch4_2_conv3_scale 0=58 1=1
+ReLU             branch4_2_conv3_relu 1 1 branch4_2_conv3_branch4_2_conv3_scale branch4_2_conv3_branch4_2_conv3_relu
+Concat           concat4          2 1 branch4_1 branch4_2_conv3_branch4_2_conv3_relu concat4 0=0
+ShuffleChannel   shuffle4         1 1 concat4 shuffle4 0=2
+Split            splitncnn_1      1 2 shuffle4 shuffle4_splitncnn_0 shuffle4_splitncnn_1
+ConvolutionDepthWise branch5_1_conv1  1 1 shuffle4_splitncnn_1 branch5_1_conv1 0=116 1=3 2=1 3=2 4=2 5=0 6=1044 7=116
+BatchNorm        branch5_1_conv1_bn 1 1 branch5_1_conv1 branch5_1_conv1_branch5_1_conv1_bn 0=116
+Scale            branch5_1_conv1_scale 1 1 branch5_1_conv1_branch5_1_conv1_bn branch5_1_conv1_branch5_1_conv1_scale 0=116 1=1
+Convolution      branch5_1_conv2  1 1 branch5_1_conv1_branch5_1_conv1_scale branch5_1_conv2 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch5_1_conv2_bn 1 1 branch5_1_conv2 branch5_1_conv2_branch5_1_conv2_bn 0=116
+Scale            branch5_1_conv2_scale 1 1 branch5_1_conv2_branch5_1_conv2_bn branch5_1_conv2_branch5_1_conv2_scale 0=116 1=1
+ReLU             branch5_1_conv2_relu 1 1 branch5_1_conv2_branch5_1_conv2_scale branch5_1_conv2_branch5_1_conv2_relu
+Convolution      branch5_2_conv1  1 1 shuffle4_splitncnn_0 branch5_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch5_2_conv1_bn 1 1 branch5_2_conv1 branch5_2_conv1_branch5_2_conv1_bn 0=116
+Scale            branch5_2_conv1_scale 1 1 branch5_2_conv1_branch5_2_conv1_bn branch5_2_conv1_branch5_2_conv1_scale 0=116 1=1
+ReLU             branch5_2_conv1_relu 1 1 branch5_2_conv1_branch5_2_conv1_scale branch5_2_conv1_branch5_2_conv1_relu
+ConvolutionDepthWise branch5_2_conv2  1 1 branch5_2_conv1_branch5_2_conv1_relu branch5_2_conv2 0=116 1=3 2=1 3=2 4=2 5=0 6=1044 7=116
+BatchNorm        branch5_2_conv2_bn 1 1 branch5_2_conv2 branch5_2_conv2_branch5_2_conv2_bn 0=116
+Scale            branch5_2_conv2_scale 1 1 branch5_2_conv2_branch5_2_conv2_bn branch5_2_conv2_branch5_2_conv2_scale 0=116 1=1
+Convolution      branch5_2_conv3  1 1 branch5_2_conv2_branch5_2_conv2_scale branch5_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch5_2_conv3_bn 1 1 branch5_2_conv3 branch5_2_conv3_branch5_2_conv3_bn 0=116
+Scale            branch5_2_conv3_scale 1 1 branch5_2_conv3_branch5_2_conv3_bn branch5_2_conv3_branch5_2_conv3_scale 0=116 1=1
+ReLU             branch5_2_conv3_relu 1 1 branch5_2_conv3_branch5_2_conv3_scale branch5_2_conv3_branch5_2_conv3_relu
+Concat           concat5          2 1 branch5_1_conv2_branch5_1_conv2_relu branch5_2_conv3_branch5_2_conv3_relu concat5 0=0
+ShuffleChannel   shuffle5         1 1 concat5 shuffle5 0=2
+Slice            slice6           1 2 shuffle5 branch6_1 branch6_2 -23300=2,116,-233 1=0
+Convolution      branch6_2_conv1  1 1 branch6_2 branch6_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch6_2_conv1_bn 1 1 branch6_2_conv1 branch6_2_conv1_branch6_2_conv1_bn 0=116
+Scale            branch6_2_conv1_scale 1 1 branch6_2_conv1_branch6_2_conv1_bn branch6_2_conv1_branch6_2_conv1_scale 0=116 1=1
+ReLU             branch6_2_conv1_relu 1 1 branch6_2_conv1_branch6_2_conv1_scale branch6_2_conv1_branch6_2_conv1_relu
+ConvolutionDepthWise branch6_2_conv2  1 1 branch6_2_conv1_branch6_2_conv1_relu branch6_2_conv2 0=116 1=3 2=1 3=1 4=1 5=0 6=1044 7=116
+BatchNorm        branch6_2_conv2_bn 1 1 branch6_2_conv2 branch6_2_conv2_branch6_2_conv2_bn 0=116
+Scale            branch6_2_conv2_scale 1 1 branch6_2_conv2_branch6_2_conv2_bn branch6_2_conv2_branch6_2_conv2_scale 0=116 1=1
+Convolution      branch6_2_conv3  1 1 branch6_2_conv2_branch6_2_conv2_scale branch6_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch6_2_conv3_bn 1 1 branch6_2_conv3 branch6_2_conv3_branch6_2_conv3_bn 0=116
+Scale            branch6_2_conv3_scale 1 1 branch6_2_conv3_branch6_2_conv3_bn branch6_2_conv3_branch6_2_conv3_scale 0=116 1=1
+ReLU             branch6_2_conv3_relu 1 1 branch6_2_conv3_branch6_2_conv3_scale branch6_2_conv3_branch6_2_conv3_relu
+Concat           concat6          2 1 branch6_1 branch6_2_conv3_branch6_2_conv3_relu concat6 0=0
+ShuffleChannel   shuffle6         1 1 concat6 shuffle6 0=2
+Slice            slice7           1 2 shuffle6 branch7_1 branch7_2 -23300=2,116,-233 1=0
+Convolution      branch7_2_conv1  1 1 branch7_2 branch7_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch7_2_conv1_bn 1 1 branch7_2_conv1 branch7_2_conv1_branch7_2_conv1_bn 0=116
+Scale            branch7_2_conv1_scale 1 1 branch7_2_conv1_branch7_2_conv1_bn branch7_2_conv1_branch7_2_conv1_scale 0=116 1=1
+ReLU             branch7_2_conv1_relu 1 1 branch7_2_conv1_branch7_2_conv1_scale branch7_2_conv1_branch7_2_conv1_relu
+ConvolutionDepthWise branch7_2_conv2  1 1 branch7_2_conv1_branch7_2_conv1_relu branch7_2_conv2 0=116 1=3 2=1 3=1 4=1 5=0 6=1044 7=116
+BatchNorm        branch7_2_conv2_bn 1 1 branch7_2_conv2 branch7_2_conv2_branch7_2_conv2_bn 0=116
+Scale            branch7_2_conv2_scale 1 1 branch7_2_conv2_branch7_2_conv2_bn branch7_2_conv2_branch7_2_conv2_scale 0=116 1=1
+Convolution      branch7_2_conv3  1 1 branch7_2_conv2_branch7_2_conv2_scale branch7_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch7_2_conv3_bn 1 1 branch7_2_conv3 branch7_2_conv3_branch7_2_conv3_bn 0=116
+Scale            branch7_2_conv3_scale 1 1 branch7_2_conv3_branch7_2_conv3_bn branch7_2_conv3_branch7_2_conv3_scale 0=116 1=1
+ReLU             branch7_2_conv3_relu 1 1 branch7_2_conv3_branch7_2_conv3_scale branch7_2_conv3_branch7_2_conv3_relu
+Concat           concat7          2 1 branch7_1 branch7_2_conv3_branch7_2_conv3_relu concat7 0=0
+ShuffleChannel   shuffle7         1 1 concat7 shuffle7 0=2
+Slice            slice8           1 2 shuffle7 branch8_1 branch8_2 -23300=2,116,-233 1=0
+Convolution      branch8_2_conv1  1 1 branch8_2 branch8_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch8_2_conv1_bn 1 1 branch8_2_conv1 branch8_2_conv1_branch8_2_conv1_bn 0=116
+Scale            branch8_2_conv1_scale 1 1 branch8_2_conv1_branch8_2_conv1_bn branch8_2_conv1_branch8_2_conv1_scale 0=116 1=1
+ReLU             branch8_2_conv1_relu 1 1 branch8_2_conv1_branch8_2_conv1_scale branch8_2_conv1_branch8_2_conv1_relu
+ConvolutionDepthWise branch8_2_conv2  1 1 branch8_2_conv1_branch8_2_conv1_relu branch8_2_conv2 0=116 1=3 2=1 3=1 4=1 5=0 6=1044 7=116
+BatchNorm        branch8_2_conv2_bn 1 1 branch8_2_conv2 branch8_2_conv2_branch8_2_conv2_bn 0=116
+Scale            branch8_2_conv2_scale 1 1 branch8_2_conv2_branch8_2_conv2_bn branch8_2_conv2_branch8_2_conv2_scale 0=116 1=1
+Convolution      branch8_2_conv3  1 1 branch8_2_conv2_branch8_2_conv2_scale branch8_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch8_2_conv3_bn 1 1 branch8_2_conv3 branch8_2_conv3_branch8_2_conv3_bn 0=116
+Scale            branch8_2_conv3_scale 1 1 branch8_2_conv3_branch8_2_conv3_bn branch8_2_conv3_branch8_2_conv3_scale 0=116 1=1
+ReLU             branch8_2_conv3_relu 1 1 branch8_2_conv3_branch8_2_conv3_scale branch8_2_conv3_branch8_2_conv3_relu
+Concat           concat8          2 1 branch8_1 branch8_2_conv3_branch8_2_conv3_relu concat8 0=0
+ShuffleChannel   shuffle8         1 1 concat8 shuffle8 0=2
+Slice            slice9           1 2 shuffle8 branch9_1 branch9_2 -23300=2,116,-233 1=0
+Convolution      branch9_2_conv1  1 1 branch9_2 branch9_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch9_2_conv1_bn 1 1 branch9_2_conv1 branch9_2_conv1_branch9_2_conv1_bn 0=116
+Scale            branch9_2_conv1_scale 1 1 branch9_2_conv1_branch9_2_conv1_bn branch9_2_conv1_branch9_2_conv1_scale 0=116 1=1
+ReLU             branch9_2_conv1_relu 1 1 branch9_2_conv1_branch9_2_conv1_scale branch9_2_conv1_branch9_2_conv1_relu
+ConvolutionDepthWise branch9_2_conv2  1 1 branch9_2_conv1_branch9_2_conv1_relu branch9_2_conv2 0=116 1=3 2=1 3=1 4=1 5=0 6=1044 7=116
+BatchNorm        branch9_2_conv2_bn 1 1 branch9_2_conv2 branch9_2_conv2_branch9_2_conv2_bn 0=116
+Scale            branch9_2_conv2_scale 1 1 branch9_2_conv2_branch9_2_conv2_bn branch9_2_conv2_branch9_2_conv2_scale 0=116 1=1
+Convolution      branch9_2_conv3  1 1 branch9_2_conv2_branch9_2_conv2_scale branch9_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch9_2_conv3_bn 1 1 branch9_2_conv3 branch9_2_conv3_branch9_2_conv3_bn 0=116
+Scale            branch9_2_conv3_scale 1 1 branch9_2_conv3_branch9_2_conv3_bn branch9_2_conv3_branch9_2_conv3_scale 0=116 1=1
+ReLU             branch9_2_conv3_relu 1 1 branch9_2_conv3_branch9_2_conv3_scale branch9_2_conv3_branch9_2_conv3_relu
+Concat           concat9          2 1 branch9_1 branch9_2_conv3_branch9_2_conv3_relu concat9 0=0
+ShuffleChannel   shuffle9         1 1 concat9 shuffle9 0=2
+Slice            slice10          1 2 shuffle9 branch10_1 branch10_2 -23300=2,116,-233 1=0
+Convolution      branch10_2_conv1 1 1 branch10_2 branch10_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch10_2_conv1_bn 1 1 branch10_2_conv1 branch10_2_conv1_branch10_2_conv1_bn 0=116
+Scale            branch10_2_conv1_scale 1 1 branch10_2_conv1_branch10_2_conv1_bn branch10_2_conv1_branch10_2_conv1_scale 0=116 1=1
+ReLU             branch10_2_conv1_relu 1 1 branch10_2_conv1_branch10_2_conv1_scale branch10_2_conv1_branch10_2_conv1_relu
+ConvolutionDepthWise branch10_2_conv2 1 1 branch10_2_conv1_branch10_2_conv1_relu branch10_2_conv2 0=116 1=3 2=1 3=1 4=1 5=0 6=1044 7=116
+BatchNorm        branch10_2_conv2_bn 1 1 branch10_2_conv2 branch10_2_conv2_branch10_2_conv2_bn 0=116
+Scale            branch10_2_conv2_scale 1 1 branch10_2_conv2_branch10_2_conv2_bn branch10_2_conv2_branch10_2_conv2_scale 0=116 1=1
+Convolution      branch10_2_conv3 1 1 branch10_2_conv2_branch10_2_conv2_scale branch10_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch10_2_conv3_bn 1 1 branch10_2_conv3 branch10_2_conv3_branch10_2_conv3_bn 0=116
+Scale            branch10_2_conv3_scale 1 1 branch10_2_conv3_branch10_2_conv3_bn branch10_2_conv3_branch10_2_conv3_scale 0=116 1=1
+ReLU             branch10_2_conv3_relu 1 1 branch10_2_conv3_branch10_2_conv3_scale branch10_2_conv3_branch10_2_conv3_relu
+Concat           concat10         2 1 branch10_1 branch10_2_conv3_branch10_2_conv3_relu concat10 0=0
+ShuffleChannel   shuffle10        1 1 concat10 shuffle10 0=2
+Slice            slice11          1 2 shuffle10 branch11_1 branch11_2 -23300=2,116,-233 1=0
+Convolution      branch11_2_conv1 1 1 branch11_2 branch11_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch11_2_conv1_bn 1 1 branch11_2_conv1 branch11_2_conv1_branch11_2_conv1_bn 0=116
+Scale            branch11_2_conv1_scale 1 1 branch11_2_conv1_branch11_2_conv1_bn branch11_2_conv1_branch11_2_conv1_scale 0=116 1=1
+ReLU             branch11_2_conv1_relu 1 1 branch11_2_conv1_branch11_2_conv1_scale branch11_2_conv1_branch11_2_conv1_relu
+ConvolutionDepthWise branch11_2_conv2 1 1 branch11_2_conv1_branch11_2_conv1_relu branch11_2_conv2 0=116 1=3 2=1 3=1 4=1 5=0 6=1044 7=116
+BatchNorm        branch11_2_conv2_bn 1 1 branch11_2_conv2 branch11_2_conv2_branch11_2_conv2_bn 0=116
+Scale            branch11_2_conv2_scale 1 1 branch11_2_conv2_branch11_2_conv2_bn branch11_2_conv2_branch11_2_conv2_scale 0=116 1=1
+Convolution      branch11_2_conv3 1 1 branch11_2_conv2_branch11_2_conv2_scale branch11_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch11_2_conv3_bn 1 1 branch11_2_conv3 branch11_2_conv3_branch11_2_conv3_bn 0=116
+Scale            branch11_2_conv3_scale 1 1 branch11_2_conv3_branch11_2_conv3_bn branch11_2_conv3_branch11_2_conv3_scale 0=116 1=1
+ReLU             branch11_2_conv3_relu 1 1 branch11_2_conv3_branch11_2_conv3_scale branch11_2_conv3_branch11_2_conv3_relu
+Concat           concat11         2 1 branch11_1 branch11_2_conv3_branch11_2_conv3_relu concat11 0=0
+ShuffleChannel   shuffle11        1 1 concat11 shuffle11 0=2
+Slice            slice12          1 2 shuffle11 branch12_1 branch12_2 -23300=2,116,-233 1=0
+Convolution      branch12_2_conv1 1 1 branch12_2 branch12_2_conv1 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch12_2_conv1_bn 1 1 branch12_2_conv1 branch12_2_conv1_branch12_2_conv1_bn 0=116
+Scale            branch12_2_conv1_scale 1 1 branch12_2_conv1_branch12_2_conv1_bn branch12_2_conv1_branch12_2_conv1_scale 0=116 1=1
+ReLU             branch12_2_conv1_relu 1 1 branch12_2_conv1_branch12_2_conv1_scale branch12_2_conv1_branch12_2_conv1_relu
+ConvolutionDepthWise branch12_2_conv2 1 1 branch12_2_conv1_branch12_2_conv1_relu branch12_2_conv2 0=116 1=3 2=1 3=1 4=1 5=0 6=1044 7=116
+BatchNorm        branch12_2_conv2_bn 1 1 branch12_2_conv2 branch12_2_conv2_branch12_2_conv2_bn 0=116
+Scale            branch12_2_conv2_scale 1 1 branch12_2_conv2_branch12_2_conv2_bn branch12_2_conv2_branch12_2_conv2_scale 0=116 1=1
+Convolution      branch12_2_conv3 1 1 branch12_2_conv2_branch12_2_conv2_scale branch12_2_conv3 0=116 1=1 2=1 3=1 4=0 5=0 6=13456
+BatchNorm        branch12_2_conv3_bn 1 1 branch12_2_conv3 branch12_2_conv3_branch12_2_conv3_bn 0=116
+Scale            branch12_2_conv3_scale 1 1 branch12_2_conv3_branch12_2_conv3_bn branch12_2_conv3_branch12_2_conv3_scale 0=116 1=1
+ReLU             branch12_2_conv3_relu 1 1 branch12_2_conv3_branch12_2_conv3_scale branch12_2_conv3_branch12_2_conv3_relu
+Concat           concat12         2 1 branch12_1 branch12_2_conv3_branch12_2_conv3_relu concat12 0=0
+ShuffleChannel   shuffle12        1 1 concat12 shuffle12 0=2
+Split            splitncnn_2      1 2 shuffle12 shuffle12_splitncnn_0 shuffle12_splitncnn_1
+ConvolutionDepthWise branch13_1_conv1 1 1 shuffle12_splitncnn_1 branch13_1_conv1 0=232 1=3 2=1 3=2 4=1 5=0 6=2088 7=232
+BatchNorm        branch13_1_conv1_bn 1 1 branch13_1_conv1 branch13_1_conv1_branch13_1_conv1_bn 0=232
+Scale            branch13_1_conv1_scale 1 1 branch13_1_conv1_branch13_1_conv1_bn branch13_1_conv1_branch13_1_conv1_scale 0=232 1=1
+Convolution      branch13_1_conv2 1 1 branch13_1_conv1_branch13_1_conv1_scale branch13_1_conv2 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch13_1_conv2_bn 1 1 branch13_1_conv2 branch13_1_conv2_branch13_1_conv2_bn 0=232
+Scale            branch13_1_conv2_scale 1 1 branch13_1_conv2_branch13_1_conv2_bn branch13_1_conv2_branch13_1_conv2_scale 0=232 1=1
+ReLU             branch13_1_conv2_relu 1 1 branch13_1_conv2_branch13_1_conv2_scale branch13_1_conv2_branch13_1_conv2_relu
+Convolution      branch13_2_conv1 1 1 shuffle12_splitncnn_0 branch13_2_conv1 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch13_2_conv1_bn 1 1 branch13_2_conv1 branch13_2_conv1_branch13_2_conv1_bn 0=232
+Scale            branch13_2_conv1_scale 1 1 branch13_2_conv1_branch13_2_conv1_bn branch13_2_conv1_branch13_2_conv1_scale 0=232 1=1
+ReLU             branch13_2_conv1_relu 1 1 branch13_2_conv1_branch13_2_conv1_scale branch13_2_conv1_branch13_2_conv1_relu
+ConvolutionDepthWise branch13_2_conv2 1 1 branch13_2_conv1_branch13_2_conv1_relu branch13_2_conv2 0=232 1=3 2=1 3=2 4=1 5=0 6=2088 7=232
+BatchNorm        branch13_2_conv2_bn 1 1 branch13_2_conv2 branch13_2_conv2_branch13_2_conv2_bn 0=232
+Scale            branch13_2_conv2_scale 1 1 branch13_2_conv2_branch13_2_conv2_bn branch13_2_conv2_branch13_2_conv2_scale 0=232 1=1
+Convolution      branch13_2_conv3 1 1 branch13_2_conv2_branch13_2_conv2_scale branch13_2_conv3 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch13_2_conv3_bn 1 1 branch13_2_conv3 branch13_2_conv3_branch13_2_conv3_bn 0=232
+Scale            branch13_2_conv3_scale 1 1 branch13_2_conv3_branch13_2_conv3_bn branch13_2_conv3_branch13_2_conv3_scale 0=232 1=1
+ReLU             branch13_2_conv3_relu 1 1 branch13_2_conv3_branch13_2_conv3_scale branch13_2_conv3_branch13_2_conv3_relu
+Concat           concat13         2 1 branch13_1_conv2_branch13_1_conv2_relu branch13_2_conv3_branch13_2_conv3_relu concat13 0=0
+ShuffleChannel   shuffle13        1 1 concat13 shuffle13 0=2
+Slice            slice14          1 2 shuffle13 branch14_1 branch14_2 -23300=2,232,-233 1=0
+Convolution      branch14_2_conv1 1 1 branch14_2 branch14_2_conv1 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch14_2_conv1_bn 1 1 branch14_2_conv1 branch14_2_conv1_branch14_2_conv1_bn 0=232
+Scale            branch14_2_conv1_scale 1 1 branch14_2_conv1_branch14_2_conv1_bn branch14_2_conv1_branch14_2_conv1_scale 0=232 1=1
+ReLU             branch14_2_conv1_relu 1 1 branch14_2_conv1_branch14_2_conv1_scale branch14_2_conv1_branch14_2_conv1_relu
+ConvolutionDepthWise branch14_2_conv2 1 1 branch14_2_conv1_branch14_2_conv1_relu branch14_2_conv2 0=232 1=3 2=1 3=1 4=1 5=0 6=2088 7=232
+BatchNorm        branch14_2_conv2_bn 1 1 branch14_2_conv2 branch14_2_conv2_branch14_2_conv2_bn 0=232
+Scale            branch14_2_conv2_scale 1 1 branch14_2_conv2_branch14_2_conv2_bn branch14_2_conv2_branch14_2_conv2_scale 0=232 1=1
+Convolution      branch14_2_conv3 1 1 branch14_2_conv2_branch14_2_conv2_scale branch14_2_conv3 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch14_2_conv3_bn 1 1 branch14_2_conv3 branch14_2_conv3_branch14_2_conv3_bn 0=232
+Scale            branch14_2_conv3_scale 1 1 branch14_2_conv3_branch14_2_conv3_bn branch14_2_conv3_branch14_2_conv3_scale 0=232 1=1
+ReLU             branch14_2_conv3_relu 1 1 branch14_2_conv3_branch14_2_conv3_scale branch14_2_conv3_branch14_2_conv3_relu
+Concat           concat14         2 1 branch14_1 branch14_2_conv3_branch14_2_conv3_relu concat14 0=0
+ShuffleChannel   shuffle14        1 1 concat14 shuffle14 0=2
+Slice            slice15          1 2 shuffle14 branch15_1 branch15_2 -23300=2,232,-233 1=0
+Convolution      branch15_2_conv1 1 1 branch15_2 branch15_2_conv1 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch15_2_conv1_bn 1 1 branch15_2_conv1 branch15_2_conv1_branch15_2_conv1_bn 0=232
+Scale            branch15_2_conv1_scale 1 1 branch15_2_conv1_branch15_2_conv1_bn branch15_2_conv1_branch15_2_conv1_scale 0=232 1=1
+ReLU             branch15_2_conv1_relu 1 1 branch15_2_conv1_branch15_2_conv1_scale branch15_2_conv1_branch15_2_conv1_relu
+ConvolutionDepthWise branch15_2_conv2 1 1 branch15_2_conv1_branch15_2_conv1_relu branch15_2_conv2 0=232 1=3 2=1 3=1 4=1 5=0 6=2088 7=232
+BatchNorm        branch15_2_conv2_bn 1 1 branch15_2_conv2 branch15_2_conv2_branch15_2_conv2_bn 0=232
+Scale            branch15_2_conv2_scale 1 1 branch15_2_conv2_branch15_2_conv2_bn branch15_2_conv2_branch15_2_conv2_scale 0=232 1=1
+Convolution      branch15_2_conv3 1 1 branch15_2_conv2_branch15_2_conv2_scale branch15_2_conv3 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch15_2_conv3_bn 1 1 branch15_2_conv3 branch15_2_conv3_branch15_2_conv3_bn 0=232
+Scale            branch15_2_conv3_scale 1 1 branch15_2_conv3_branch15_2_conv3_bn branch15_2_conv3_branch15_2_conv3_scale 0=232 1=1
+ReLU             branch15_2_conv3_relu 1 1 branch15_2_conv3_branch15_2_conv3_scale branch15_2_conv3_branch15_2_conv3_relu
+Concat           concat15         2 1 branch15_1 branch15_2_conv3_branch15_2_conv3_relu concat15 0=0
+ShuffleChannel   shuffle15        1 1 concat15 shuffle15 0=2
+Slice            slice16          1 2 shuffle15 branch16_1 branch16_2 -23300=2,232,-233 1=0
+Convolution      branch16_2_conv1 1 1 branch16_2 branch16_2_conv1 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch16_2_conv1_bn 1 1 branch16_2_conv1 branch16_2_conv1_branch16_2_conv1_bn 0=232
+Scale            branch16_2_conv1_scale 1 1 branch16_2_conv1_branch16_2_conv1_bn branch16_2_conv1_branch16_2_conv1_scale 0=232 1=1
+ReLU             branch16_2_conv1_relu 1 1 branch16_2_conv1_branch16_2_conv1_scale branch16_2_conv1_branch16_2_conv1_relu
+ConvolutionDepthWise branch16_2_conv2 1 1 branch16_2_conv1_branch16_2_conv1_relu branch16_2_conv2 0=232 1=3 2=1 3=1 4=1 5=0 6=2088 7=232
+BatchNorm        branch16_2_conv2_bn 1 1 branch16_2_conv2 branch16_2_conv2_branch16_2_conv2_bn 0=232
+Scale            branch16_2_conv2_scale 1 1 branch16_2_conv2_branch16_2_conv2_bn branch16_2_conv2_branch16_2_conv2_scale 0=232 1=1
+Convolution      branch16_2_conv3 1 1 branch16_2_conv2_branch16_2_conv2_scale branch16_2_conv3 0=232 1=1 2=1 3=1 4=0 5=0 6=53824
+BatchNorm        branch16_2_conv3_bn 1 1 branch16_2_conv3 branch16_2_conv3_branch16_2_conv3_bn 0=232
+Scale            branch16_2_conv3_scale 1 1 branch16_2_conv3_branch16_2_conv3_bn branch16_2_conv3_branch16_2_conv3_scale 0=232 1=1
+ReLU             branch16_2_conv3_relu 1 1 branch16_2_conv3_branch16_2_conv3_scale branch16_2_conv3_branch16_2_conv3_relu
+Concat           concat16         2 1 branch16_1 branch16_2_conv3_branch16_2_conv3_relu concat16 0=0
+ShuffleChannel   shuffle16        1 1 concat16 shuffle16 0=2
+Convolution      conv5            1 1 shuffle16 conv5 0=1024 1=1 2=1 3=1 4=0 5=0 6=475136
+BatchNorm        conv5_bn         1 1 conv5 conv5_conv5_bn 0=1024
+Scale            conv5_scale      1 1 conv5_conv5_bn conv5_conv5_scale 0=1024 1=1
+ReLU             conv5_relu       1 1 conv5_conv5_scale conv5_conv5_relu
+Pooling          pool_ave         1 1 conv5_conv5_relu pool_ave 0=1 1=0 2=1 3=0 4=1
+Convolution      pred             1 1 pool_ave pred 0=254 1=1 2=1 3=1 4=0 5=1 6=260096
+Reshape          landmark_pred    1 1 pred landmark_pred 0=-1 1=-233 2=-233 3=0
