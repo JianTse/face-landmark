@@ -1,0 +1,19 @@
+terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_lexical_cast> >'
+  what():  bad lexical cast: source type value could not be interpreted as target
+*** Aborted at 1566435999 (unix time) try "date -d @1566435999" if you are using GNU date ***
+PC: @     0x7f988773f428 gsignal
+*** SIGABRT (@0x7f75) received by PID 32629 (TID 0x7f988a440c80) from PID 32629; stack trace: ***
+    @     0x7f988773f4b0 (unknown)
+    @     0x7f988773f428 gsignal
+    @     0x7f988774102a abort
+    @     0x7f988855384d __gnu_cxx::__verbose_terminate_handler()
+    @     0x7f98885516b6 (unknown)
+    @     0x7f9888551701 std::terminate()
+    @     0x7f9888551919 __cxa_throw
+    @           0x40f011 boost::throw_exception<>()
+    @           0x4087a2 get_gpus()
+    @           0x40a519 train()
+    @           0x407568 main
+    @     0x7f988772a830 __libc_start_main
+    @           0x407e39 _start
+    @                0x0 (unknown)
