@@ -65,16 +65,19 @@ def norm(img):
     return img
 
 
-def get_dataset(imglists_path, landmark_num=5):
+def get_dataset(imgDir, imglists_path, landmark_num=5):
     imagelist = open(imglists_path, 'r')
 
     dataset = []
     for line in imagelist.readlines():
         info = line.strip().split(' ')
+        imgFn = imgDir + info[0]
+        if not os.path.exists(imgFn):
+            continue
+
         data_example = dict()
-        
         #data_example['filename'] = os.path.join("../../data/preproc",info[0])
-        data_example['filename'] = info[0]
+        data_example['filename'] = imgFn
         landmark = []
 
         assert len(info)==1+landmark_num*2 and landmark_num!=2, "Length of info {} or landmark_num {} is error".format(len(info), landmark_num)
@@ -133,7 +136,7 @@ def batch_gen(path, batch_size, shuffle=True, landmark_num=127):
 
         yield batch
 
-def get_hdf5(imglists_path, output_txt, hdf5_dir, img_size, batch_size, shuffling=False, landmark_num=5):
+def get_hdf5(imgDir, imglists_path, output_txt, hdf5_dir, img_size, batch_size, shuffling=False, landmark_num=5):
     """Runs the conversion operation.
 
     Args:
@@ -141,7 +144,9 @@ def get_hdf5(imglists_path, output_txt, hdf5_dir, img_size, batch_size, shufflin
       output_dir: Output directory.
     """
     # GET Dataset, and shuffling.
-    dataset = get_dataset(imglists_path, landmark_num=landmark_num)
+    dataset = get_dataset(imgDir, imglists_path, landmark_num=landmark_num)
+    print("dataSet size: %d" % (len(dataset)))
+
     # filenames = dataset['filename']
     if shuffling:
         prefix = "shuffle_"
@@ -151,14 +156,14 @@ def get_hdf5(imglists_path, output_txt, hdf5_dir, img_size, batch_size, shufflin
 
     bg = batch_generator(dataset, batch_size)
 
-    imgDir = "E:/work/data/landmark/samples/98/"
+    #imgDir = "E:/work/data/landmark/samples/98/"
     txt = open(output_txt, 'w')
     
     img_array = np.zeros((batch_size, 3, img_size, img_size)).astype(np.float32)
     label_array = np.zeros((batch_size, landmark_num*2)).astype(np.float32)
     for i,batch in enumerate(bg):
         for j,item in enumerate(batch):
-            imgFn = imgDir + item['filename']
+            imgFn = item['filename']
             img = cv2.imread(imgFn)
             if img is None:
                 print("Warning:cv2.imread {} is None".format(item['filename']))
@@ -176,12 +181,13 @@ def get_hdf5(imglists_path, output_txt, hdf5_dir, img_size, batch_size, shufflin
             label_array[j, ...] =label
 
         filename = prefix + "batch_" + str(i) + ".hdf5"
-        with h5py.File(os.path.join(hdf5_dir,filename), 'w') as f:
+        hdf5Fn = hdf5_dir + filename
+        with h5py.File(hdf5Fn, 'w') as f:
             f.create_dataset('data', data=np.asarray(img_array).astype(np.float32))            
             f.create_dataset('label', data=np.asarray(label_array).astype(np.float32))
        
-        txt.writelines(filename+'\n')
-        print(filename)
+        txt.writelines(hdf5Fn+'\n')
+        print(hdf5Fn)
 
     txt.close()
 
@@ -309,8 +315,54 @@ def gen_end2end(imglists, batch_size, shuffle=True, proc_fn=None):
     '''
     print("All done.")    
 
+def genHdf5(imgDir, sampleListFn, hdf5Dir, img_size):
+    if not os.path.exists(hdf5Dir):
+        os.makedirs(hdf5Dir)
+    #img_size = 112
+    batch_size = 64
+    saveDir = hdf5Dir + str(img_size) + '/'
+    output_txt = saveDir + "hdf5-norm.txt"
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
+    get_hdf5(imgDir, sampleListFn, output_txt, saveDir, img_size, batch_size, shuffling=True, landmark_num=127)
+
+def genValHDF5(rootDir, img_size):
+    imgDir = rootDir + 'valSample/'
+    sampleListFn = rootDir + 'val_sample_list.txt'
+    hdf5Dir = rootDir + 'valHDF5/'
+    genHdf5(imgDir, sampleListFn, hdf5Dir, img_size)
+
+def genTestHDF5(rootDir, img_size):
+    imgDir = rootDir + 'testSample/'
+    sampleListFn = rootDir + 'test_sample_list.txt'
+    hdf5Dir = rootDir + 'testHDF5/'
+    genHdf5(imgDir, sampleListFn, hdf5Dir, img_size)
+
+def genTrainHDF5(rootDir, img_size):
+    imgDir = rootDir + 'trainSample/'
+    sampleListFn = rootDir + 'train_sample_list.txt'
+    hdf5Dir = rootDir + 'trainHDF5/'
+    genHdf5(imgDir, sampleListFn, hdf5Dir, img_size)
+
+def genAllHDF5():
+    # rootDir = 'E:/work/data/landmark/beadwallet/samples/'
+    rootDir = '/home/sxdz/data/landmark/beadwallet/samples/'
+    img_size = 112
+    genValHDF5(rootDir, img_size)
+    genTrainHDF5(rootDir, img_size)
+    genTestHDF5(rootDir, img_size)
+    img_size = 96
+    genValHDF5(rootDir, img_size)
+    genTrainHDF5(rootDir, img_size)
+    genTestHDF5(rootDir, img_size)
+    img_size = 64
+    genValHDF5(rootDir, img_size)
+    genTrainHDF5(rootDir, img_size)
+    genTestHDF5(rootDir, img_size)
 
 if __name__ == '__main__':
+    genAllHDF5()
+
 
     #imglists_path = "data/landmark_48_aug.txt"
     #output_path = "data/tfdata/landmark_data.tfrecord"
@@ -323,7 +375,7 @@ if __name__ == '__main__':
     #imglists_path = os.path.join(data_dir, str(img_size), "landmark_aug.txt")
     #imglists_path = "E:/work/data/landmark/samples/train_98_list.txt"
     imglists_path = "E:/work/data/landmark/samples/98/test_98_list.txt"
-
+    '''
     #out_dir = "hdf5_2"
     #out_dir = "hdf5-90"
     #out_dir = "hdf5-end2end112"
@@ -339,6 +391,12 @@ if __name__ == '__main__':
         os.makedirs(hdf5_dir)
     
     
-    get_hdf5(imglists_path, output_txt, hdf5_dir, img_size, batch_size, shuffling=True, landmark_num=98)
+    #get_hdf5(imglists_path, output_txt, hdf5_dir, img_size, batch_size, shuffling=True, landmark_num=98)
 
     #gen_end2end(imglists_path, batch_size, shuffle=True, proc_fn=norm)
+    
+    
+    "/home/sxdz/data/landmark/beadwallet/samples/trainHDF5/112/hdf5-norm.txt"
+    "/home/sxdz/data/landmark/beadwallet/samples/valHDF5/112/hdf5-norm.txt"
+    
+    '''

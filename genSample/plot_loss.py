@@ -14,7 +14,8 @@ def is_number(s):
     return True
 
 #log_file = sys.argv[1]
-log_file = '../model/log.txt'
+#log_file = '../M3-112x112-TRAIN/model/log.txt'
+log_file = '../mobilenet-TRAIN/model_112/log.txt'
 lines = open(log_file, 'r').readlines()
 
 train_loss = []

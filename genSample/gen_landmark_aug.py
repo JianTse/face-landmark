@@ -6,12 +6,27 @@ from os.path import join, exists
 import cv2
 import numpy as np
 import numpy.random as npr
+from gen_hdf5 import genAllHDF5
 from landmark_augment import LandmarkAugment
 from landmark_helper import LandmarkHelper
+from euler_angles import PnpHeadPoseEstimator
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 __landmark_augment = LandmarkAugment()
 __landmark_helper = LandmarkHelper()
+
+def estimatorPose(image, ldmark127):
+    __estimator = PnpHeadPoseEstimator(cam_w=image.shape[1], cam_h=image.shape[0])
+    points_to_return = [17, 21, 22, 26, 36, 39, 42, 45, 31, 35, 48, 54, 57, 8]
+    landmarks = np.zeros((len(points_to_return), 2), dtype=np.float32)
+    counter = 0
+    for point in points_to_return:
+        landmarks[counter] = [ldmark127[point][0], ldmark127[point][1]]
+        counter += 1
+    pitch_yaw_roll = __estimator.return_pitch_yaw_roll(landmarks)
+    pitch, yaw, roll = map(lambda x: x[0], pitch_yaw_roll)
+    return [pitch, yaw, roll]
+
 def load_file_list(anno_fn):
     list = []
     with open(anno_fn, 'r') as f_anno:
@@ -60,225 +75,65 @@ def IoU(box, boxes):
     inter = w * h
     ovr = inter*1.0 / (box_area + area - inter)
     return ovr
-'''
-def GenerateData(ftxt, out_txt, out_dir,img_size,argument=False, landmark_num=5):
-    #需要修改
-    #1：将所有原始数据全部都flip
-    #2：数据集由原来的+flip共同组成
-    #3：将新的数据集上做数据增强，包括随机平移、缩放、旋转
-    #4：在做数据增强的时候，要保证所有的ldmark点都在样本图像内部，
-    
-    size = img_size
-    image_id = 0
-    continue_cnt = 0
-    #f = open(join(OUTPUT,"landmark_%s_aug.txt" %(size)),'w')
-    f = open(out_txt, "w")
-    data = getDataFromTxt(ftxt, landmark_num=landmark_num)
-    idx = 0
-    #image_path bbox landmark(5*2)
-    for (imgPath, bbox, landmarkGt) in data:
-        #print imgPath
-        F_imgs = []
-        F_landmarks = []        
-        img = cv2.imread(imgPath)
-        assert(img is not None)
-        img_h,img_w,img_c = img.shape
-        gt_box = np.array([bbox.left,bbox.top,bbox.right,bbox.bottom])
-        f_face = img[bbox.top:bbox.bottom+1,bbox.left:bbox.right+1]
-        f_face = cv2.resize(f_face,(size,size))
-        landmark = np.zeros((landmark_num, 2))
-        #normalize
-        for index, one in enumerate(landmarkGt):
-            rv = ((one[0]-gt_box[0])/(gt_box[2]-gt_box[0]), (one[1]-gt_box[1])/(gt_box[3]-gt_box[1]))
-            landmark[index] = rv
-        
-        F_imgs.append(f_face)
-        F_landmarks.append(landmark.reshape(landmark_num*2))
-        landmark = np.zeros((landmark_num, 2))        
-        if argument:
-            idx = idx + 1
-            if idx % 100 == 0:
-                print idx, "images done"
-            x1, y1, x2, y2 = gt_box
-            #gt's width
-            gt_w = x2 - x1 + 1
-            #gt's height
-            gt_h = y2 - y1 + 1        
-            if max(gt_w, gt_h) < 40 or x1 < 0 or y1 < 0:
-                continue
-            #random shift
-            for i in range(50):  #10
-                bbox_size = npr.randint(int(min(gt_w, gt_h) * 0.8), np.ceil(1.25 * max(gt_w, gt_h)))
-                delta_x = npr.randint(-gt_w * 0.2, gt_w * 0.2)
-                delta_y = npr.randint(-gt_h * 0.2, gt_h * 0.2)
-                nx1 = max(x1+gt_w/2-bbox_size/2+delta_x,0)
-                ny1 = max(y1+gt_h/2-bbox_size/2+delta_y,0)
-                
-                nx2 = nx1 + bbox_size
-                ny2 = ny1 + bbox_size
-                if nx2 > img_w or ny2 > img_h:
-                    continue_cnt = continue_cnt+1
-                    print("continue_cnt:{}, bbox_size:{}, delta_x:{}, delat_y:{}, nx1:{}, ny1:{}, nx2:{}, ny2:{}, img_w:{} img_h：{}".format(continue_cnt, bbox_size, delta_x, delta_y, nx1, ny1, nx2, ny2, img_w, img_h))
-                    continue
-                crop_box = np.array([nx1,ny1,nx2,ny2])
-                cropped_im = img[ny1:ny2+1,nx1:nx2+1,:]
-                resized_im = cv2.resize(cropped_im, (size, size))
-                #cal iou
-                iou = IoU(crop_box, np.expand_dims(gt_box,0))
-                if iou > 0.65:
-                    F_imgs.append(resized_im)
-                    #normalize
-                    for index, one in enumerate(landmarkGt):
-                        rv = ((one[0]-nx1)/bbox_size, (one[1]-ny1)/bbox_size)
-                        landmark[index] = rv
-                    F_landmarks.append(landmark.reshape(landmark_num*2))
-                    landmark = np.zeros((landmark_num, 2))
-                    landmark_ = F_landmarks[-1].reshape(-1,2)
-                    bbox = BBox([nx1,ny1,nx2,ny2])                    
 
-                    #mirror                    
-                    if random.choice([0,1,2]) > 0:
-                        face_flipped, landmark_flipped = flip(resized_im, landmark_)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        #c*h*w
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2))                    
-                    #rotate
-                    if random.choice([0,1,2]) > 0:
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), 5)#逆时针旋转
-                        #landmark_offset
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        #flip
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2))                
-                    
-                    #inverse clockwise rotation
-                    if random.choice([0,1,2]) > 0: 
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), -5)#顺时针旋转
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2)) 
+def flip_landmark(imgWidth, landmark):
+    """
+        flip landmark
+    """
 
-                    #big angle
-                    #rotate
-                    if random.choice([0,1,2]) > 0:
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), 10)#逆时针旋转
-                        #landmark_offset
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        #flip
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2))                
-                    
-                    #inverse clockwise rotation
-                    if random.choice([0,1,2]) > 0: 
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), -10)#顺时针旋转
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2)) 
+    def swap_points_sym(a, b):
+        tmp = a.copy()
+        a = b[::-1]
+        b = tmp[::-1]
+        return a, b
 
-                    #rotate
-                    if random.choice([0,1,2]) > 0:
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), 20)#逆时针旋转
-                        #landmark_offset
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        #flip
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2))                
-                    
-                    #inverse clockwise rotation
-                    if random.choice([0,1,2]) > 0: 
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), -20)#顺时针旋转
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2)) 
-                    #rotate
-                    if random.choice([0,1,2]) > 0:
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), 30)#逆时针旋转
-                        #landmark_offset
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        #flip
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2))                
-                    
-                    #inverse clockwise rotation
-                    if random.choice([0,1,2]) > 0: 
-                        face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
-                                                                         bbox.reprojectLandmark(landmark_), -30)#顺时针旋转
-                        landmark_rotated = bbox.projectLandmark(landmark_rotated)
-                        face_rotated_by_alpha = cv2.resize(face_rotated_by_alpha, (size, size))
-                        F_imgs.append(face_rotated_by_alpha)
-                        F_landmarks.append(landmark_rotated.reshape(landmark_num*2))
-                
-                        face_flipped, landmark_flipped = flip(face_rotated_by_alpha, landmark_rotated)
-                        face_flipped = cv2.resize(face_flipped, (size, size))
-                        F_imgs.append(face_flipped)
-                        F_landmarks.append(landmark_flipped.reshape(landmark_num*2)) 
-                    
+    def swap_points(a, b):
+        tmp = a.copy()
+        a = b
+        b = tmp
+        return a, b
 
+    # mirror
+    landmark_ = np.asarray([(imgWidth - x, y) for (x, y) in landmark])
 
-            F_imgs, F_landmarks = np.asarray(F_imgs), np.asarray(F_landmarks)
-            #print F_imgs.shape
-            #print F_landmarks.shape
-            for i in range(len(F_imgs)):
-                print image_id
-                cv2.imwrite(join(out_dir,"%d.jpg" %(image_id)), F_imgs[i])
-                landmarks = map(str,list(F_landmarks[i]))
-                f.write(join(out_dir,"%d.jpg" %(image_id)) + " " +" ".join(landmarks)+"\n")
-                image_id = image_id + 1
-     
-    f.close()
-    print("continue_cnt:{}".format(continue_cnt))
-    return F_imgs,F_landmarks
-'''
+    # 5 landmakr points
+    if len(landmark) == 5:
+        landmark_[[0, 1]] = landmark_[[1, 0]]  # left eye<->right eye
+        landmark_[[3, 4]] = landmark_[[4, 3]]  # left mouth<->right mouth
+
+    # 127 landmark points
+    elif len(landmark) == 127:
+        landmark_[0:8], landmark_[9:17] = swap_points_sym(landmark_[0:8], landmark_[9:17])
+        landmark_[17:22], landmark_[22:27] = swap_points_sym(landmark_[17:22], landmark_[22:27])
+        landmark_[31:33], landmark_[34:36] = swap_points_sym(landmark_[31:33], landmark_[34:36])
+        # landmark_[36:42], landmark_[42, 48] = swap_points_sym(landmark_[36:42], landmark_[42, 48])
+        landmark_[36:40], landmark_[42:46] = swap_points_sym(landmark_[36:40], landmark_[42:46])
+        landmark_[40:42], landmark_[46:48] = swap_points_sym(landmark_[40:42], landmark_[46:48])
+
+        landmark_[48:51], landmark_[52:55] = swap_points_sym(landmark_[48:51], landmark_[52:55])
+        landmark_[55:57], landmark_[58:60] = swap_points_sym(landmark_[55:57], landmark_[58:60])
+        landmark_[60:62], landmark_[63:65] = swap_points_sym(landmark_[60:62], landmark_[63:65])
+        landmark_[65], landmark_[67] = swap_points(landmark_[65], landmark_[67])
+        landmark_[68:71], landmark_[71:74] = swap_points_sym(landmark_[68:71], landmark_[71:74])
+        landmark_[74:79], landmark_[84:89] = swap_points_sym(landmark_[74:79], landmark_[84:89])
+        landmark_[79:84], landmark_[89:94] = swap_points_sym(landmark_[79:84], landmark_[89:94])
+        # landmark_[94:99], landmark_[99:104] = swap_points_sym(landmark_[94:99], landmark_[99:104])
+        landmark_[94], landmark_[101] = swap_points(landmark_[94], landmark_[101])
+        landmark_[95], landmark_[100] = swap_points(landmark_[95], landmark_[100])
+        landmark_[96], landmark_[99] = swap_points(landmark_[96], landmark_[99])
+        landmark_[97], landmark_[102] = swap_points(landmark_[97], landmark_[102])
+        landmark_[98], landmark_[103] = swap_points(landmark_[98], landmark_[103])
+
+        landmark_[104:109], landmark_[109:114] = swap_points_sym(landmark_[104:109], landmark_[109:114])
+        landmark_[114:118], landmark_[118:122] = swap_points(landmark_[114:118], landmark_[118:122])
+        landmark_[122], landmark_[123] = swap_points(landmark_[122], landmark_[123])
+        landmark_[125], landmark_[126] = swap_points(landmark_[125], landmark_[126])
+
+    else:
+        print("Warning: Lenth of landmark is invalid.")
+
+    return landmark_
+
 def infoToStr(imgFn, ldmark):
     retStr = imgFn
     for idx in range(len(ldmark)):
@@ -298,13 +153,19 @@ def readTrainInfo(imgDir, line):
 
 def readTestInfo(imgDir, line):
     param = line.split()
-    data = map(float, param[0:196])
     ret = {}
     ret['imgDir'] = imgDir
-    ret['imgFn'] = param[196]
-    path, ret['ldmark'] = __landmark_helper.parse(imgDir, line, 98)
+    ret['imgFn'] = param[0]
+    path, ret['ldmark'] = __landmark_helper.parse(imgDir, line, 127)
     return ret
 
+def flip(img, gt_info):
+    flip_img = cv2.flip(img, 1)
+    ret = {}
+    ret['imgDir'] = gt_info['imgDir']
+    ret['imgFn'] = gt_info['imgFn']
+    ret['ldmark'] = flip_landmark(img.shape[1], gt_info['ldmark'])
+    return flip_img, ret
 
 def showSample(image_new, landmarks_new):
     landmarks = landmarks_new.reshape([-1, 2])
@@ -312,46 +173,91 @@ def showSample(image_new, landmarks_new):
         ii = tuple(l * (112, 112))
         cv2.circle(image_new, (int(ii[0]), int(ii[1])), 2, (0, 255, 0), -1)
     cv2.imshow('sample', image_new)
-    cv2.waitKey(1)
+    cv2.waitKey(0)
 
-def saveSample(image_new, landmarks_new, sampleDir, srcImgIdx, augIdx, saveFn):
-    imgFn = sampleDir + '/%d_%d.jpg' % (srcImgIdx, augIdx)
+def saveSample(image_new, landmarks_new, sampleDir, srcImgIdx, augIdx, saveFn, type):
+    if type == 0:
+        imgFn = '%d_%d.jpg' % (srcImgIdx, augIdx)
+    else:
+        imgFn = '%d_%d_flip.jpg' % (srcImgIdx, augIdx)
     retStr = infoToStr(imgFn, landmarks_new)
     saveFn.write(retStr + '\n')
-    cv2.imwrite(imgFn, image_new)
+    saveImgFn = sampleDir + '/' + imgFn
+    cv2.imwrite(saveImgFn, image_new)
 
-def genAugSample(image, ldmarks,saveF, sampleDir, srcImgIdx):
-    for i in range(2):
-        image_new, landmarks_new = __landmark_augment.augment(image, ldmarks, 112, 20, (1.1, 1.3))
-        saveSample(image_new, landmarks_new, sampleDir, srcImgIdx, i+1, saveF)
-        showSample(image_new, landmarks_new)
+def genAugSample(image, ldmarks,saveF, sampleDir, srcImgIdx, type):
+    for i in range(14):
+        minAngle = (i - 7) * 5
+        maxAngle = minAngle + 5
+        print ('%d: [%d:%d]'%(i, minAngle, maxAngle))
+        angleRange = [minAngle,maxAngle]
+        image_new, landmarks_new = __landmark_augment.augment(image, ldmarks, 112, angleRange, (1.1, 1.3))
+        saveSample(image_new, landmarks_new, sampleDir, srcImgIdx, i, saveF,type)
+        #showSample(image_new, landmarks_new)
 
-def GenerateData(srcImgDir, srcList):
-    sampleDir = 'E:/work/data/landmark/samples/98/testSample_98'
-    saveF = open("E:/work/data/landmark/samples/98/test_98_list.txt", "w")
+def genAugSample_new(image, ldmarks,saveF, sampleDir, srcImgIdx, type):
+    pitch, yaw, roll = estimatorPose(image, ldmarks)
+    start_angle = -35 + roll #方向反了
+    end_angle = 35 + roll #方向反了
+    for i in range(16):
+        minAngle = start_angle + i * 5
+        maxAngle = minAngle + 5
+        if minAngle >= start_angle and maxAngle <= end_angle:
+            #print ('good: %d: [%d:%d]'%(i, minAngle, maxAngle))
+            angleRange = [minAngle,maxAngle]
+            image_new, landmarks_new = __landmark_augment.augment(image, ldmarks, 112, angleRange, (1.1, 1.3))
+            saveSample(image_new, landmarks_new, sampleDir, srcImgIdx, i, saveF,type)
+            #showSample(image_new, landmarks_new)
+        #else:
+        #    print ('bad: %d: [%d:%d]' % (i, minAngle, maxAngle))
+
+def GenerateData(srcImgDir, srcList, dstSampleDir, dstSampleListFn):
+    if not os.path.exists(dstSampleDir):
+        os.makedirs(dstSampleDir)
+    saveF = open(dstSampleListFn, "w")
     for idx in range(len(srcList)):
-        #info = readTrainInfo(srcImgDir, srcList[idx])
+        print ('%d, %d'%(len(srcList),idx))
         info = readTestInfo(srcImgDir, srcList[idx])
         image = cv2.imread(info['imgDir'] + info['imgFn'])
-        image_new, landmarks_new = __landmark_augment.augment(image, info['ldmark'], 112, 20, (1.1, 1.3))
-        saveSample(image_new, landmarks_new, sampleDir, idx, 0, saveF)
-        showSample(image_new, landmarks_new)
-        genAugSample(image, info['ldmark'], saveF, sampleDir, idx)
-
+        genAugSample_new(image, info['ldmark'], saveF, dstSampleDir, idx, 0)
+        flip_img, flip_info = flip(image, info)
+        genAugSample_new(flip_img, flip_info['ldmark'], saveF, dstSampleDir, idx, 1)
     saveF.close()
 
 def readAllGT():
-    srcImgDir = 'E:/work/data/landmark/WFLW/WFLW_images/WFLW_images/'
-    srcFn = 'list_98pt_test.txt'
-    srcList = load_file_list(srcFn)
-    '''
-    for idx in range(len(srcList)):
-        info = readTestInfo(srcImgDir, srcList[idx])
-        img = cv2.imread(info['imgDir'] + info['imgFn'])
-        drawPts(img, info, 'img')
-        cv2.waitKey(0)
-    '''
-    GenerateData(srcImgDir, srcList)
+    #rootDir = 'E:/work/data/landmark/beadwallet/'
+    rootDir = '/home/sxdz/data/landmark/beadwallet/'
+    srcImgDir = rootDir + 'images/'
+
+    srcTrainImgListFn = rootDir + 'samples/train_anno_list.txt'
+    dstTrainSampleDir = rootDir + 'samples/trainSample'
+    dstTrainSampleListFn = rootDir + 'samples/train_sample_list.txt'
+    srcTrainList = load_file_list(srcTrainImgListFn)
+    GenerateData(rootDir, srcTrainList, dstTrainSampleDir, dstTrainSampleListFn)
+    
+    srcTestImgListFn = rootDir + 'samples/test_anno_list.txt'
+    dstTestSampleDir = rootDir + 'samples/testSample'
+    dstTestSampleListFn = rootDir + 'samples/test_sample_list.txt'
+    srcTestList = load_file_list(srcTestImgListFn)
+    GenerateData(rootDir, srcTestList, dstTestSampleDir, dstTestSampleListFn)
+
+    srcValImgListFn = rootDir + 'samples/val_anno_list.txt'
+    dstValSampleDir = rootDir + 'samples/valSample'
+    dstValSampleListFn = rootDir + 'samples/val_sample_list.txt'
+    srcValList = load_file_list(srcValImgListFn)
+    GenerateData(rootDir, srcValList, dstValSampleDir, dstValSampleListFn)
+
+    #genAllHDF5()
 
 if __name__ == '__main__':
     readAllGT()
+
+    '''
+    rootDir = 'E:/work/data/landmark/'
+    srcImgDir = rootDir + 'poseSample/'
+    srcValImgListFn = rootDir + 'poseSample/anno.txt'
+    dstValSampleDir = rootDir + 'poseSample/dstSample'
+    dstValSampleListFn = rootDir + 'poseSample/dst_sample_list.txt'
+    srcValList = load_file_list(srcValImgListFn)
+    GenerateData(rootDir, srcValList, dstValSampleDir, dstValSampleListFn)
+    '''

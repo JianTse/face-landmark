@@ -13,7 +13,7 @@ class LandmarkAugment(object):
     def __init__(self):
         pass
 
-    def augment(self, image, landmarks, output_size, max_angle, scale_range):
+    def augment(self, image, landmarks, output_size, angleRange, scale_range):
         '''Do image augment.
         Args:
             image: a numpy type
@@ -27,7 +27,7 @@ class LandmarkAugment(object):
             No
         '''
         #image, landmarks = self.__flip(image, landmarks)
-        image, landmarks = self.__rotate(image, landmarks, max_angle)
+        image, landmarks = self.__rotate(image, landmarks, angleRange)
         image, landmarks = self.__scale_and_shift(image, landmarks, scale_range, output_size)
         landmarks = landmarks.flatten()
         return image, landmarks
@@ -73,7 +73,7 @@ class LandmarkAugment(object):
         landmarks = LandmarkHelper.flip(landmarks, landmarks.shape[0])
         return image, landmarks
 
-    def __rotate(self, image, landmarks, max_angle):
+    def __rotate(self, image, landmarks, angleRange):
         '''Do image rotate.
         Args:
             image: a numpy type
@@ -87,7 +87,7 @@ class LandmarkAugment(object):
         c_x = (min(landmarks[:, 0]) + max(landmarks[:, 0])) / 2
         c_y = (min(landmarks[:, 1]) + max(landmarks[:, 1])) / 2
         h, w = image.shape[:2]
-        angle = np.random.randint(-max_angle, max_angle)
+        angle = np.random.randint(angleRange[0], angleRange[1])
         M = cv2.getRotationMatrix2D((c_x, c_y), angle, 1)
         image = cv2.warpAffine(image, M, (w, h)) 
         b = np.ones((landmarks.shape[0], 1))

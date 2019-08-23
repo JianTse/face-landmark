@@ -30,6 +30,8 @@ class LandmarkHelper(object):
             return cls.__landmark83_txt_parse(line)
         elif landmark_type == 98:
             return cls.__landmark98_txt_parse(imgDir,line)
+        elif landmark_type == 127:
+            return cls.__landmark127_txt_parse(imgDir,line)
         else:
             raise Exception("Unsupport landmark type...")
 
@@ -129,6 +131,27 @@ class LandmarkHelper(object):
         data = map(float, a[5:141])
         pts = []  # x1,y1,x2,y2...
         for idx in range(68):
+            x = data[idx * 2]
+            y = data[idx * 2 + 1]
+            pts.append(x)
+            pts.append(y)
+        imgFn = imgDir + a[0]
+        return imgFn, np.array(pts).reshape((-1, 2))
+
+    @staticmethod
+    def __landmark127_txt_parse(imgDir, line):
+        '''
+        Args:
+            line: 0=file path, 1=landmarks83, 2=bbox, 4=pose
+        Returns:
+            file path and landmarks with numpy type
+        Raises:
+            No
+        '''
+        a = line.split()
+        data = map(float, a[1:255])
+        pts = []  # x1,y1,x2,y2...
+        for idx in range(127):
             x = data[idx * 2]
             y = data[idx * 2 + 1]
             pts.append(x)
