@@ -156,14 +156,17 @@ def readTestInfo(imgDir, line):
     ret = {}
     ret['imgDir'] = imgDir
     ret['imgFn'] = param[0]
+    ret['eva'] = [float(param[255]), float(param[256]), float(param[257])]
     path, ret['ldmark'] = __landmark_helper.parse(imgDir, line, 127)
     return ret
 
 def flip(img, gt_info):
     flip_img = cv2.flip(img, 1)
+    eva = gt_info['eva']
     ret = {}
     ret['imgDir'] = gt_info['imgDir']
     ret['imgFn'] = gt_info['imgFn']
+    ret['eva'] = [eva[0], -1*eva[1], -1*eva[2]]
     ret['ldmark'] = flip_landmark(img.shape[1], gt_info['ldmark'])
     return flip_img, ret
 
@@ -195,10 +198,10 @@ def genAugSample(image, ldmarks,saveF, sampleDir, srcImgIdx, type):
         saveSample(image_new, landmarks_new, sampleDir, srcImgIdx, i, saveF,type)
         #showSample(image_new, landmarks_new)
 
-def genAugSample_new(image, ldmarks,saveF, sampleDir, srcImgIdx, type):
-    pitch, yaw, roll = estimatorPose(image, ldmarks)
-    start_angle = -35 + roll #方向反了
-    end_angle = 35 + roll #方向反了
+def genAugSample_new(image, ldmarks, eva, saveF, sampleDir, srcImgIdx, type):
+    #pitch, yaw, roll = estimatorPose(image, ldmarks)
+    start_angle = -35 + eva[2] #方向反了
+    end_angle = 35 + eva[2] #方向反了
     for i in range(16):
         minAngle = start_angle + i * 5
         maxAngle = minAngle + 5
@@ -219,9 +222,11 @@ def GenerateData(srcImgDir, srcList, dstSampleDir, dstSampleListFn):
         print ('%d, %d'%(len(srcList),idx))
         info = readTestInfo(srcImgDir, srcList[idx])
         image = cv2.imread(info['imgDir'] + info['imgFn'])
-        genAugSample_new(image, info['ldmark'], saveF, dstSampleDir, idx, 0)
+        #genAugSample(image, info['ldmark'], saveF, dstSampleDir, idx, 0)
+        genAugSample_new(image, info['ldmark'], info['eva'], saveF, dstSampleDir, idx, 0)
         flip_img, flip_info = flip(image, info)
-        genAugSample_new(flip_img, flip_info['ldmark'], saveF, dstSampleDir, idx, 1)
+        #genAugSample(flip_img, flip_info['ldmark'], saveF, dstSampleDir, idx, 1)
+        genAugSample_new(flip_img, flip_info['ldmark'], flip_info['eva'], saveF, dstSampleDir, idx, 1)
     saveF.close()
 
 def readAllGT():
