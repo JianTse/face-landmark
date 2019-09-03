@@ -178,6 +178,8 @@
     <ClInclude Include="pdm\PDM.h" />
     <ClInclude Include="pdm\pdmHelper.h" />
     <ClInclude Include="pdm\RotationHelpers.h" />
+    <ClInclude Include="pointSmooth\pointSmooth.h" />
+    <ClInclude Include="pointSmooth\tracker.h" />
     <ClInclude Include="poseEst\poseEst.h" />
     <ClInclude Include="sdm\access.hpp" />
     <ClInclude Include="sdm\adapters.hpp" />
@@ -255,6 +257,8 @@
     <ClCompile Include="pdm\LandmarkDetectorUtils.cpp" />
     <ClCompile Include="pdm\PDM.cpp" />
     <ClCompile Include="pdm\pdmHelper.cpp" />
+    <ClCompile Include="pointSmooth\pointSmooth.cpp" />
+    <ClCompile Include="pointSmooth\tracker.cpp" />
     <ClCompile Include="poseEst\poseEst.cpp" />
     <ClCompile Include="sdm\feature_descriptor.cpp" />
     <ClCompile Include="sdm\helper.cpp" />

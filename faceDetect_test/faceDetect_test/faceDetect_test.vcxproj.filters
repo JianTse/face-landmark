@@ -40,6 +40,9 @@
     <Filter Include="landmark\pdm">
       <UniqueIdentifier>{72a51ba5-3677-4e2d-9663-812271ba2d05}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pointSmooth">
+      <UniqueIdentifier>{2932a5cb-e271-44a2-973a-f3ab8e8a1d06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -321,6 +324,12 @@
     <ClInclude Include="poseEst\poseEst.h">
       <Filter>poseEst</Filter>
     </ClInclude>
+    <ClInclude Include="pointSmooth\pointSmooth.h">
+      <Filter>pointSmooth</Filter>
+    </ClInclude>
+    <ClInclude Include="pointSmooth\tracker.h">
+      <Filter>pointSmooth</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -377,8 +386,14 @@
     <ClCompile Include="poseEst\poseEst.cpp">
       <Filter>poseEst</Filter>
     </ClCompile>
+    <ClCompile Include="pointSmooth\pointSmooth.cpp">
+      <Filter>pointSmooth</Filter>
+    </ClCompile>
     <ClCompile Include="ldmarkTest.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pointSmooth\tracker.cpp">
+      <Filter>pointSmooth</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

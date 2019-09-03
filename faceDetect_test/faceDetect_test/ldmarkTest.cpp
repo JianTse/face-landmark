@@ -10,6 +10,7 @@
 #include "sdm\ldmarkmodel.h"
 #include "poseEst\poseEst.h"
 #include "pdm\pdmHelper.h"
+#include "pointSmooth\pointSmooth.h"
 
 struct mtcnnRet
 {
@@ -115,6 +116,22 @@ void  savePoseSample(cv::Mat& img, std::vector<cv::Point>& ldmarks, std::vector<
 	fflush(fp);
 }
 
+void loadAngles(std::vector<float>& angles, float val, int size)
+{
+	if (angles.size() < size)
+	{
+		angles.push_back(val);
+	}
+	else
+	{
+		std::vector<float> angleTmp;
+		angleTmp.assign(angles.begin(), angles.end());
+		angleTmp.push_back(val);
+		angles.resize(size);
+		angles.assign(angleTmp.begin()+1, angleTmp.end());
+	}	
+}
+
 int detectVideo()
 {
 	const char* detectModelDir = "./mtcnn_model";
@@ -142,7 +159,6 @@ int detectVideo()
 	}
 
 	//pose
-	CPoseEst  _pose;
 
 	std::vector<mtcnnRet> retBgr, retNir;
 
@@ -181,9 +197,18 @@ int detectVideo()
 		return 0;
 	}
 
+	CLdmarkLKSmooth _LKsmooth;
+	CLdmarkPoseSmooth _smooth;
+
+	std::vector<float> pitchs;
+	std::vector<float> yaws;
+	std::vector<float> rolls;
+
 	cv::Mat frame;
 	int saveFlag = 0;	
 	int nframe = 0;
+	double  aveSrcTime = 0;
+	double  aveDstTime = 0;
 	for (;;) {
 		nframe++;
 		mCamera >> frame;
@@ -191,37 +216,64 @@ int detectVideo()
 		cv::Rect bgrRect = cv::Rect(0, 0, frame.cols, frame.rows);
 		detectFaceImg(detector, frame, bgrRect, retBgr);
 
-		cv::Mat frameClone = frame.clone();
+		//cv::Mat frameClone = frame.clone();
 
 		char info[1280];
+		std::vector<float> eavs;
 		for (int i = 0; i < retBgr.size(); i++)
-		{
-			std::vector<float> eva;
+		{			
 			std::vector<cv::Point>src_ldmarks;
 			std::vector<cv::Point>ldmarks;
-			//src_ldmarks = ldmark.run(frame, retBgr[i].rect);
+			std::vector<cv::Point>ldmarks_smooth;
+			double t1 = cvGetTickCount() / (1000.0 * cvGetTickFrequency());
+			src_ldmarks = ldmark.run(frame, retBgr[i].rect);
+			double t2 = cvGetTickCount() / (1000.0 * cvGetTickFrequency());
 			ldmarks = m3_ldmark.run(frame, retBgr[i].rect);
-			//_pose.estimateEav(src_ldmarks, 0, eva);
+			double t3 = cvGetTickCount() / (1000.0 * cvGetTickFrequency());
+			estimateEav(src_ldmarks, eavs);
 
-			//cv::rectangle(frame, retBgr[i].rect, cv::Scalar(0,255,0));
+			loadAngles(pitchs, eavs[0], 600);
+			loadAngles(yaws, eavs[1], 600);
+			loadAngles(rolls, eavs[2], 600);
 
-			//sprintf(info, "%.2f, %.2f, %.2f", eva[0], eva[1], eva[2]);
-			//cv::putText(frameClone, info, cv::Point(10, 50), 2, 2, cv::Scalar(0,0,255));
+			//_smooth.updateLdmarks(ldmarks, ldmarks_smooth);
+			//cv::Rect boundbox = getBoundingBox(cv::Size(frame.cols, frame.rows), src_ldmarks);
 
-			for (int k = 0; k < ldmarks.size(); k++)
+			_LKsmooth.trackKeyPoints(frame, ldmarks, eavs, ldmarks_smooth);
+
+			aveSrcTime = (t2 - t1) * 0.1;
+			aveDstTime = (t3 - t2) * 0.1;
+
+			//printf("%f, %f\n", t2 - t1, t3 - t2);
+		    cv::rectangle(frame, retBgr[i].rect, cv::Scalar(0,255,0));			
+			//cv::rectangle(frame, boundbox, cv::Scalar(0, 0, 255));
+
+			//for (int k = 0; k < ldmarks.size(); k++)
+			//{
+			//	cv::circle(frame, ldmarks[k], 1, cv::Scalar(0,255,0),-1);
+			//}
+			for (int k = 0; k < ldmarks_smooth.size(); k++)
 			{
-				cv::circle(frame, ldmarks[k], 1, cv::Scalar(0,255,0),-1);
+				cv::circle(frame, ldmarks_smooth[k], 1, cv::Scalar(0, 255, 255), -1);
 			}
 			for (int k = 0; k < src_ldmarks.size(); k++)
 			{
-				cv::circle(frameClone, src_ldmarks[k], 1, cv::Scalar(0, 255, 0), -1);
+				cv::circle(frame, src_ldmarks[k], 1, cv::Scalar(0, 0, 255), -1);
 			}
 		}
 
-		//drawMtcnnRet(frame, retBgr);
+		if (eavs.size() == 3)
+		{
+			sprintf(info, "%.2f, %.2f, %.2f", eavs[0], eavs[1], eavs[2]);
+			cv::putText(frame, info, cv::Point(10, 50), 1, 1.5, cv::Scalar(0, 0, 255));
+		}		
+		drawEvas(pitchs, yaws, rolls);
 
-		cv::imshow("frame", frame);
-		cv::imshow("src", frameClone);
+		//sprintf(info, "t:%.2f %.2f", aveSrcTime, aveDstTime);
+		//cv::putText(frame, info, cv::Point(10, 50), 1, 1.5, cv::Scalar(0, 0, 255));
+
+		cv::imshow("img", frame);
+		//cv::imshow("src", frameClone);
 		int key = cv::waitKey(1);
 		if ((char)key == ' ')
 		{
@@ -230,6 +282,7 @@ int detectVideo()
 		if ((char)key == 's')
 		{
 			saveFlag = 1;			
+			cv::imwrite("detect.jpg", frame);
 		}
 		else if ((char)key == 27)//esc
 		{

@@ -134,6 +134,46 @@ inline cv::Mat getGrayImage(cv::Mat img)
     return img;
 }
 
+inline void cutSubImg(cv::Mat& srcImg, cv::Rect& srcRoi, cv::Mat& dstImg, cv::Rect& dstRoi)
+{
+	int src_x1, src_y1, src_x2, src_y2;
+	int dst_x1, dst_y1, dst_x2, dst_y2;
+
+	src_x1 = srcRoi.x;
+	src_y1 = srcRoi.y;
+	src_x2 = srcRoi.x + srcRoi.width;
+	src_y2 = srcRoi.y + srcRoi.height;
+	dst_x1 = src_x1;
+	dst_y1 = src_y1;
+
+	int ext_x1 = 0;
+	int ext_y1 = 0;
+	int ext_x2 = 0;
+	int ext_y2 = 0;
+
+	int extendFlag = 0;
+	if (src_x1 < 0)
+	{
+		ext_x1 = -src_x1;
+	}
+	if (src_y1 < 0)
+	{
+		ext_y1 = -src_y1;
+	}
+	if (src_x2 >= srcImg.cols)
+	{
+		ext_x2 = src_x2 - srcImg.cols + 1;
+	}
+	if (ext_y2 >= srcImg.rows)
+	{
+		ext_y2 = src_y2 - srcImg.rows + 1;
+	}
+		
+	int width = srcImg.cols + ext_x1 + ext_x2;
+	int height = srcImg.rows + ext_y1 + ext_y2;
+
+	
+	
 }
 
 

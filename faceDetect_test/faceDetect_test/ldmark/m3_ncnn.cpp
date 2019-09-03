@@ -15,10 +15,16 @@ M3_Ldmark::~M3_Ldmark() {
 }
 
 void M3_Ldmark::init(const std::string& modelDir) {
-	//std::string param_file = modelDir + "/M3_deploy.param";
-	//std::string bin_file = modelDir + "/M3_iter_1000000.bin";
-	std::string param_file = modelDir + "/cascade_mobilenet_112_deploy.param";
-	std::string bin_file = modelDir + "/cascade_mobilenet_112_iter_200000.bin";
+	std::string param_file = modelDir + "/shufflenetv2_112_deploy.param";
+	//std::string bin_file = modelDir + "/shufflenetv2-112_iter_180000.bin";
+	std::string bin_file = modelDir + "/shufflenetv2-112_iter_240000.bin";
+
+	//std::string param_file = modelDir + "/shufflenetv2_wflw_112_deploy.param";
+	//std::string bin_file = modelDir + "/shufflenetv2-wflw_112_iter_300000.bin";
+	//std::string bin_file = modelDir + "/shufflenetv2-wflw-112_iter_400000.bin";
+
+	//std::string param_file = modelDir + "/shufflenetv2s1_deploy.param";
+	//std::string bin_file = modelDir + "/shufflenetv2s1_iter_720000.bin";
 	int size;
 	size = model.load_param(param_file.data());
 	if (size != 0) {
@@ -112,7 +118,7 @@ void  M3_Ldmark::refineDlibBox(cv::Rect& box)
 void  M3_Ldmark::refine127Box(cv::Rect& box)
 {
 	int size = max(box.width, box.height);
-	int bigSize = cvRound(size * 1.2);
+	int bigSize = cvRound(size * 1.15);
 	int cx = box.x + box.width / 2;
 	int cy = box.y + box.height / 2;
 	box.x = cx - bigSize / 2;
@@ -133,10 +139,16 @@ std::vector<cv::Point> M3_Ldmark::run(const cv::Mat &img, cv::Rect& faceRect)
 	cv::Rect box = faceRect;
 
 #if  0
-	refine98Box(cv::Rect& box)
+	refine98Box(box);
 #else	
 	refine127Box(box);	
 #endif
+
+	//cv::Mat imgClone = img.clone();
+	//cv::rectangle(imgClone, box, cv::Scalar(0, 0, 255));
+	//cv::rectangle(imgClone, faceRect, cv::Scalar(0, 255, 0));
+	//cv::imshow("imgBox", imgClone);
+	//cv::waitKey(1);
 
 	int left = box.x;
 	int right = left + box.width;

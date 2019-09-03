@@ -17,6 +17,8 @@
 #include "recttools.hpp"
 
 void GetTimeString(char *_timeString, int _strMaxLenth);
+float cvGetPointDistance(cv::Point a, cv::Point b);
+float cvGetPoint2fDistance(cv::Point2f a, cv::Point2f b);
 cv::Rect valid_rect(cv::Point pt1, cv::Point pt2, int width, int height);
 cv::Rect cvExtendRect(cv::Rect rect,int width,int height);
 void cvValidateRect(cv::Size& _maxSize, cv::Rect& _rect);
@@ -29,6 +31,8 @@ void calculateDepthHistogram(float* pHistogram, int histogramSize, cv::Mat& dept
 void  convDepth2YellowBgr(cv::Mat& depthData, cv::Mat& depthBgr);
 void  convDepth2Bgr(cv::Mat& depthData, cv::Mat& depthBgr);
 void  convDepth2Gray(cv::Mat& depthData, cv::Mat& depthGray);
+float clarityJudge(cv::Mat& img, std::vector<cv::Point>& ldmark68);
+void  drawEvas(std::vector<float>& pitchs, std::vector<float>& yaws, std::vector<float>& rolls);
 
 int  fileExist(const std::string file);
 int  creatDir(const std::string file);

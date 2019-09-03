@@ -8,6 +8,19 @@ void GetTimeString(char *_timeString, int _strMaxLenth)
 	strftime(_timeString, _strMaxLenth, "%Y-%m-%d-%H-%M-%S", timeStamp);
 }
 
+float cvGetPointDistance(cv::Point a, cv::Point b)
+{
+	float d = (float)(a.x - b.x)*(float)(a.x - b.x) + (float)(a.y - b.y)*(float)(a.y - b.y);
+	return sqrtf(d);
+}
+
+float cvGetPoint2fDistance(cv::Point2f a, cv::Point2f b)
+{
+	float d = (float)(a.x - b.x)*(float)(a.x - b.x) + (float)(a.y - b.y)*(float)(a.y - b.y);
+	return sqrtf(d);
+}
+
+
 cv::Rect valid_rect(cv::Point pt1, cv::Point pt2, int width, int height)
 {
 	if ((pt1.x > -1) && (pt1.y > -1) && (pt2.x < width) && (pt2.y < height))
@@ -385,4 +398,123 @@ void string_replace(std::string &strBig, const std::string &strsrc, const std::s
 		strBig.replace(pos, srclen, strdst);
 		pos += dstlen;
 	}
+}
+
+float clarityJudge(cv::Mat& img, std::vector<cv::Point>& ldmark68)
+{
+	cv::Rect boundingbox = getBoundingBox(cv::Size(img.cols, img.rows), ldmark68);
+
+#define PATCH_WIDTH  48
+#define PATCH_HEIGHT  48
+	cv::Mat patch, grayPatch;
+	cv::resize(img(boundingbox), patch, cv::Size(PATCH_WIDTH, PATCH_HEIGHT));
+	cv::cvtColor(patch, grayPatch, cv::COLOR_BGR2GRAY);
+
+	int intValue[PATCH_HEIGHT][PATCH_WIDTH];
+	int sub[(PATCH_HEIGHT << 1) + 1][(PATCH_WIDTH << 1) + 1];
+
+	cv::Mat_<cv::Vec3b>::iterator data = grayPatch.begin<cv::Vec3b>();
+	for (int i = 0; i< PATCH_HEIGHT; i++) {
+		for (int j = 0; j < PATCH_WIDTH; j++) {
+			intValue[i][j] = (int)(*data++)[0];
+		}
+	}
+	//Apply Sobel on x and y directions and add together.
+	cv::Mat grad_x, grad_y;
+	cv::Mat abs_grad_x, abs_grad_y, dst;
+	cv::Sobel(grayPatch, grad_x, CV_16S, 1, 0, 3, 1, 1);
+	cv::convertScaleAbs(grad_x, abs_grad_x);
+	cv::Sobel(grayPatch, grad_y, CV_16S, 0, 1, 3, 1, 1);
+	cv::convertScaleAbs(grad_y, abs_grad_y);
+	cv::addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst);
+
+	//Scalar mean;  //均值
+	//Scalar stddev;  //标准差
+	//cv::meanStdDev(dst, mean, stddev);  //计算均值和标准差
+	//double mean_pxl = mean.val[0];
+	//double stddev_pxl = stddev.val[0];	
+
+	//Create a look-up table.
+	cv::Mat_<cv::Vec3b>::iterator it = dst.begin<cv::Vec3b>();
+	int counter = 0; //Record the total number of pixels involved.
+	int res = 0;
+	memset(sub, 0, sizeof(sub));
+	for (int i = 1; i < PATCH_WIDTH; i++) {
+		sub[1][i << 1] = abs(intValue[0][i] - intValue[0][i - 1]);
+	}
+	for (int i = 1; i < PATCH_HEIGHT; i++) {
+		sub[i << 1][1] = abs(intValue[i][0] - intValue[i - 1][0]);
+		for (int j = 1; j < PATCH_WIDTH; j++) {
+			sub[(i << 1) + 1][j << 1] = abs(intValue[i][j] - intValue[i - 1][j]);
+			sub[i << 1][(j << 1) + 1] = abs(intValue[i][j] - intValue[i][j - 1]);
+			sub[i << 1][j << 1] = (abs(intValue[i][j] - intValue[i - 1][j - 1]));
+		}
+	}
+	//Compute clarity.
+	for (int i = 0; i < PATCH_HEIGHT; i++) {
+		for (int j = 0; j < PATCH_WIDTH; j++) {
+			if (((int)(*it++)[0] >= 20)) {
+				res += (((sub[i << 1][(j << 1) + 1] +
+					sub[(i << 1) + 2][(j << 1) + 1] +
+					sub[(i << 1) + 1][j << 1] +
+					sub[(i << 1) + 1][(j << 1) + 2]) << 1) +
+					(sub[i << 1][j << 1] +
+						sub[(i << 1) + 2][j << 1] +
+						sub[i << 1][(j << 1) + 2] +
+						sub[(i << 1) + 2][(j << 1) + 2]));
+				counter++;
+			}
+		}
+	}
+	float  ratio = (double)res / counter;
+	return ratio;
+}
+
+int  getYvalue(cv::Mat& img, float range, float srcVal)
+{
+	float bin = (img.rows / 2) / range;
+	int dstVal = (range - srcVal) *  bin;
+	return dstVal;
+}
+void  drawAngle(cv::Mat& img, float range, std::vector<float>& angles, cv::Scalar& color)
+{
+	cv::Point p1, p2;
+	p1 = cv::Point(0, getYvalue(img, 45.0, angles[0]));
+	for (int i = 0; i < angles.size(); i++)
+	{
+		p2 = cv::Point(i, getYvalue(img, 45.0, angles[i]));
+		cv::line(img, p1, p2, color);
+		p1 = p2;
+	}
+}
+void  drawEvas(std::vector<float>& pitchs, std::vector<float>& yaws, std::vector<float>& rolls)
+{
+	cv::Mat  img = cv::Mat::zeros(cv::Size(640, 360), CV_8UC3);
+	cv::Point p1, p2;
+
+	//画坐标系
+	p1 = cv::Point(0, img.rows/2);
+	p2 = cv::Point(img.cols, img.rows/2);
+	cv::line(img, p1, p2, cv::Scalar(120, 120, 120));
+
+	for (int i = -45; i <= 45; i++)
+	{
+		int y = getYvalue(img, 45.0, i);
+		p1 = cv::Point(0, y);
+		int x = 10;
+		if (i % 5 == 0)
+		{
+			x = img.cols;
+		}
+		p2 = cv::Point(x, y);
+		cv::line(img, p1, p2, cv::Scalar(120, 120, 120));
+	}
+
+	//pitch
+	drawAngle(img, 45.0, pitchs, cv::Scalar(255, 0, 0));
+	drawAngle(img, 45.0, yaws, cv::Scalar(0, 255, 0));
+	drawAngle(img, 45.0, rolls, cv::Scalar(0, 0, 255));
+
+	cv::imshow("pose", img);
+	//cv::waitKey(1);
 }
