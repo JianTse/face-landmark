@@ -38,4 +38,13 @@ int  fileExist(const std::string file);
 int  creatDir(const std::string file);
 void getFiles(std::string path, std::vector<std::string>& files);
 void string_replace(std::string &strBig, const std::string &strsrc, const std::string &strdst);
+
+std::vector<std::string> split2(std::string str, std::string pattern);
+void str2Ldmak1(std::vector<std::string>& params, int startId, int endId, std::vector<cv::Point>& ldmark);
+void str2Ldmak2(std::vector<std::string>& params, int startId, int endId, std::vector<cv::Point>& ldmark);
+void str2FLdmak(std::vector<std::string>& params, int startId, int endId, std::vector<cv::Point2f>& ldmark);
+std::string  FloatLdmark2Str(std::vector<cv::Point2f>& ldmark);
+std::string  IntLdmark2Str(std::vector<cv::Point>& ldmark);
+std::string  eva2Str(std::vector<float>& eva);
+std::string  rect2Str(cv::Rect& rect);
 #endif /* __COMMON_H__ */

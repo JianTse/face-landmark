@@ -7,7 +7,7 @@ float median(vector<float> v) {
 
 CPointSmooth::CPointSmooth()
 {
-	_thresh = 2.5;
+	_thresh = 2.0;
 	_alpha = 0.25;
 	_dev = 2.0;
 	_center = cv::Point2f(-1000,-1000);
@@ -28,7 +28,7 @@ cv::Point  CPointSmooth::update(cv::Point& srcPt)
 		_center.x = _center.x * (1 - _alpha) + srcPt.x * _alpha;
 		_center.y = _center.y * (1 - _alpha) + srcPt.y * _alpha;
 		_dev = _dev *  (1 - _alpha) + distant * _alpha;
-		_dev = std::min(5.0f, _dev);
+		_dev = std::min(3.0f, _dev);
 		_dev = std::max(1.0f, _dev);
 		dst = cv::Point(_center.x, _center.y);
 	}
@@ -51,7 +51,7 @@ CLdmarkLKSmooth::~CLdmarkLKSmooth()
 
 }
 
-void  CLdmarkLKSmooth::updateLdmarks(cv::Mat& img, std::vector<cv::Point>& srcPts, std::vector<cv::Point>& dstPts)
+void  CLdmarkLKSmooth::trackLdmarks(cv::Mat& img, std::vector<cv::Point>& srcPts, std::vector<cv::Point>& dstPts)
 {
 	dstPts.clear();
 	if (inited == 0)
@@ -91,36 +91,49 @@ void  CLdmarkLKSmooth::updateLdmarks(cv::Mat& img, std::vector<cv::Point>& srcPt
 	_lastImg = img.clone();
 }
 
-void  CLdmarkLKSmooth::getAveOffset(std::vector<cv::Point2f>& pts1, std::vector<cv::Point2f>& pts2, cv::Point2f& offset)
+//用匹配上的点判断当前人脸是否存在运动
+cv::Point2f CLdmarkLKSmooth::clcAveOffset(std::vector<cv::Point2f>& lastValPts, std::vector<cv::Point2f>&curValPts)
 {
-	offset = cv::Point2f(0, 0);
-	int size = 0;
-	for (int i = 0; i < pts1.size(); i++)
+	float delta_x = 0;
+	float delta_y = 0;
+	for (int i = 0; i < lastValPts.size(); i++)
 	{
-		if (pts1[i].x < 0) continue;
-
-		size++;
-		offset.x += (pts1[i].x - pts2[i].x);
-		offset.y += (pts1[i].y - pts2[i].y);
+		delta_x += curValPts[i].x - lastValPts[i].x;
+		delta_y += curValPts[i].y - lastValPts[i].y;
 	}
-	offset.x /= size;
-	offset.y /= size;
+	delta_x /= lastValPts.size();
+	delta_y /= lastValPts.size();
+	return cv::Point2f(delta_x, delta_y);
 }
 
-void  CLdmarkLKSmooth::addAveOffset(std::vector<cv::Point2f>& srcPts, cv::Point2f& offset, std::vector<cv::Point2f>& dstPts)
+void  CLdmarkLKSmooth::gaussFilter(std::vector<cv::Point>& srcPts, std::vector<cv::Point>& dstPts)
 {
 	dstPts.clear();
-	for (int i = 0; i < srcPts.size(); i++)
+	if (inited == 0)
 	{
-		float x = srcPts[i].x + offset.x;
-		float y = srcPts[i].y + offset.y;
-		dstPts.push_back(cv::Point2f(x, y));
+		for (int i = 0; i < srcPts.size(); i++)
+		{
+			CPointSmooth _pointer;
+			cv::Point ret = _pointer.update(srcPts[i]);
+			_points.push_back(_pointer);
+			dstPts.push_back(ret);
+		}
+		inited = 1;
+	}
+	else
+	{
+		for (int i = 0; i < _points.size(); i++)
+		{
+			cv::Point ret = _points[i].update(srcPts[i]);
+			dstPts.push_back(ret);
+		}
 	}
 }
 
 void CLdmarkLKSmooth::trackKeyPoints(cv::Mat& img, std::vector<cv::Point>& srcPts, std::vector<float>& evas, std::vector<cv::Point>& dstPts)
 {
-	dstPts.clear();
+	dstPts.resize(srcPts.size());
+	_lastPts.resize(srcPts.size());
 	if (_lastImg.empty())
 	{
 		_lastImg = img.clone();		
@@ -128,8 +141,8 @@ void CLdmarkLKSmooth::trackKeyPoints(cv::Mat& img, std::vector<cv::Point>& srcPt
 		{
 			int x = srcPts[i].x;
 			int y = srcPts[i].y;
-			dstPts.push_back(cv::Point(x, y));
-			_lastPts.push_back(cv::Point2f(x, y));
+			dstPts[i] = cv::Point(x, y);
+			_lastPts[i] = cv::Point2f(x, y);
 		}
 		return;
 	}
@@ -147,50 +160,82 @@ void CLdmarkLKSmooth::trackKeyPoints(cv::Mat& img, std::vector<cv::Point>& srcPt
 
 	//得到匹配点对
 	vector<cv::Point2f> lastValPts, curValPts;
-	filterPts(_lastPts, _curPts, lastValPts, curValPts);
+	bool ret = filterPts(_lastPts, _curPts, lastValPts, curValPts);
 
-	//求变换矩阵
-	cv::Mat matrix = cv::findHomography(lastValPts, curValPts);
+#if  0
+	cv::Mat  _curImgClone = img.clone();
+	cv::Mat  _lastImgClone = _lastImg.clone();
+	for (int i = 0; i < lastValPts.size(); i++)
+	{
+		cv::circle(_curImgClone, curValPts[i], 1, cv::Scalar(0, 0, 255), -1);
+		cv::circle(_lastImgClone, lastValPts[i], 1, cv::Scalar(0, 255, 255), -1);
+	}
+	cv::imshow("_curImgClone", _curImgClone);
+	cv::imshow("_lastImgClone", _lastImgClone);
+#endif
 
-	//将上一帧的特征点变换到当前帧
-	_curPts.resize(_lastPts.size());
-	cv::perspectiveTransform(_lastPts, _curPts, matrix);
-	//cv::transform(_lastPts, _curPts, matrix);
 
-	//cv::Mat  _lastImgClone = _lastImg.clone();
-	//cv::Mat  _curImgClone = img.clone();
-	//for (int i = 0; i < _lastPts.size(); i++)
-	//{
-	//	cv::circle(_lastImgClone, _lastPts[i], 1, cv::Scalar(0, 255, 0), -1);
-	//	cv::circle(_curImgClone, _curPts[i], 1, cv::Scalar(0, 0, 255), -1);
-	//}
-	//cv::imshow("last", _lastImgClone);
-	//cv::imshow("cur", _curImgClone);
+	if (ret && lastValPts.size() > 5)
+	{
+		_curPts.resize(_lastPts.size());
+		//求变换矩阵
+#if  0
+		cv::Mat matrix = cv::findHomography(lastValPts, curValPts);		
+		cv::perspectiveTransform(_lastPts, _curPts, matrix);
+#else
+		cv::Mat matrix = cv::estimateRigidTransform(lastValPts, curValPts, 1);
+		if (matrix.cols == 3 && matrix.rows == 2)
+		{
+			cv::transform(_lastPts, _curPts, matrix);
+		}		
+#endif
+	}	
 
 	//比较检测的结果与跟踪的结果的误差
+	std::vector<cv::Point> trackerPts(srcPts.size());
 	for (int i = 0; i < _curPts.size(); i++)
 	{
-		int t_x = _curPts[i].x;
-		int t_y = _curPts[i].y;
+		float t_x = _curPts[i].x;
+		float t_y = _curPts[i].y;
 		float dist = cvGetPointDistance(cv::Point(t_x,t_y), srcPts[i]);
-		if (dist < 5)
+		if(dist < 5)
 		{
-			dstPts.push_back(cv::Point(t_x, t_y));
+			trackerPts[i] = cv::Point(t_x, t_y);
 			_lastPts[i] = _curPts[i];
 		}
-		//else  if (dist < 10)
-		//{
-		//	int ave_x = (t_x + srcPts[i].x) / 2;
-		//	int ave_y = (t_y + srcPts[i].y) / 2;
-		//	dstPts.push_back(cv::Point(ave_x, ave_y));
-		//	_lastPts[i] = cv::Point(ave_x, ave_y);
-		//}
-		else
+		else//  if (dist < 7)
 		{
-			dstPts.push_back(srcPts[i]);
-			_lastPts[i] = cv::Point2f(srcPts[i].x, srcPts[i].y);
+			float alpha = 0.5;
+			float ave_x = (t_x*(1-alpha) + srcPts[i].x*alpha);
+			float ave_y = (t_y*(1-alpha) + srcPts[i].y*alpha);
+			trackerPts.push_back(cv::Point(ave_x, ave_y));
+			_lastPts[i] = cv::Point2f(ave_x, ave_y);
 		}
+		//else
+		//{
+		//	trackerPts.push_back(srcPts[i]);
+		//	_lastPts[i] = cv::Point2f(srcPts[i].x, srcPts[i].y);
+		//}
 	}
+
+	//gauss
+	//gaussFilter(trackerPts, dstPts);
+	dstPts.assign(trackerPts.begin(), trackerPts.end());
+
+#if  0
+	cv::Mat  _srcImgClone = img.clone();
+	cv::Mat  _trackImgClone = img.clone();
+	cv::Mat  _gaussImgClone = img.clone();
+	for (int i = 0; i < srcPts.size(); i++)
+	{
+		cv::circle(_srcImgClone, srcPts[i], 1, cv::Scalar(0, 0, 255), -1);
+		cv::circle(_trackImgClone, trackerPts[i], 1, cv::Scalar(0, 255, 255), -1);
+		cv::circle(_gaussImgClone, dstPts[i], 1, cv::Scalar(0, 255, 0), -1);
+	}
+	cv::imshow("_srcImgClone", _srcImgClone);
+	cv::imshow("_trackImgClone", _trackImgClone);
+	cv::imshow("_gaussImgClone", _gaussImgClone);
+#endif
 
 	_lastImg = img.clone();
 }
@@ -214,50 +259,34 @@ void CLdmarkLKSmooth::normCrossCorrelation(const cv::Mat& img1, const cv::Mat& i
 }
 bool CLdmarkLKSmooth::filterPts(vector<cv::Point2f>& srcPoints1, vector<cv::Point2f>& srcPoints2, 
 	vector<cv::Point2f>& dstPoints1, vector<cv::Point2f>& dstPoints2) {
-	//dstPoints1.resize(srcPoints1.size());
-	//dstPoints2.resize(srcPoints2.size());
-	//for (int i = 0; i < dstPoints1.size(); i++)
-	//{
-		//dstPoints1[i] = cv::Point2f(-1,-1);
-		//dstPoints2[i] = cv::Point2f(-1, -1);
-	//}
-
 	//Get Error Medians
 	float simmed = median(similarity);
 	size_t i, k;
 	for (i = k = 0; i<srcPoints2.size(); ++i) {
 		if (!status[i])continue;
 		if (similarity[i] >= simmed) {
-			//points1[k] = points1[i];
-			//points2[k] = points2[i];
 			FB_error[k] = FB_error[i];
 			k++;
 		}
 	}
 	if (k == 0)return false;
-	//points1.resize(k);
-	//points2.resize(k);
 	FB_error.resize(k);
 	fbmed = median(FB_error);
 	for (i = k = 0; i<srcPoints2.size(); ++i) {
 		if (!status[i])continue;
 		if (FB_error[i] <= fbmed && similarity[i] >= simmed) {
-			//dstPoints1[i] = srcPoints1[i];
-			//dstPoints2[i] = srcPoints2[i];
 			dstPoints1.push_back(srcPoints1[i]);
 			dstPoints2.push_back(srcPoints2[i]);
 			k++;
 		}
 	}
-	//points1.resize(k);
-	//points2.resize(k);
-
-	
-
-
 	if (k>0)return true;
 	else return false;
 }
+
+
+
+
 
 
 CLdmarkPoseSmooth::CLdmarkPoseSmooth()

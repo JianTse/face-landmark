@@ -2,7 +2,7 @@
 #define __POINT_SMOOTH_H__
 
 /************************************************************************
-*	ͷ�ļ�
+*	头文件
 ************************************************************************/
 #include "opencv/cv.h"
 #include "../util/common.h"
@@ -16,13 +16,11 @@ public:
 	CPointSmooth();
 	~CPointSmooth();
 	cv::Point  update(cv::Point& srcPt);
-
 private:
 	cv::Point2f  _center;
 	float  _dev;
 	float  _thresh;
-	float  _alpha;
-	
+	float  _alpha;	
 };
 
 class CLdmarkLKSmooth
@@ -30,11 +28,10 @@ class CLdmarkLKSmooth
 public:
 	CLdmarkLKSmooth();
 	~CLdmarkLKSmooth();
-	void  updateLdmarks(cv::Mat& img, std::vector<cv::Point>& srcPts, std::vector<cv::Point>& dstPts);
+	void  trackLdmarks(cv::Mat& img, std::vector<cv::Point>& srcPts, std::vector<cv::Point>& dstPts);
 	void  trackKeyPoints(cv::Mat& img, std::vector<cv::Point>& srcPts, std::vector<float>& evas, std::vector<cv::Point>& dstPts);
 private:
 	int inited;
-	std::vector<CPointSmooth>  _pointer;
 
 	cv::Mat _lastImg;
 	std::vector<cv::Point2f> _lastPts;
@@ -44,9 +41,9 @@ private:
 	std::vector<uchar> FB_status;
 	std::vector<float> similarity;
 	std::vector<float> FB_error;
-	cv::Size window_size = cv::Size(4, 4);
-	int level = 5;
-	cv::TermCriteria term_criteria = cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 20, 0.03);
+	cv::Size window_size = cv::Size(9, 9);
+	int level = 3;
+	cv::TermCriteria term_criteria = cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 10, 0.03);
 	float lambda = 0.5;
 	float fbmed;
 
@@ -54,13 +51,14 @@ private:
 	bool filterPts(vector<cv::Point2f>& srcPoints1, vector<cv::Point2f>& srcPoints2,
 		vector<cv::Point2f>& dstPoints1, vector<cv::Point2f>& dstPoints2);
 
-	cv::Point2f offset;
-	std::vector<cv::Point2f> lastPtsTmp;
-	void  getAveOffset(std::vector<cv::Point2f>& pts1, std::vector<cv::Point2f>& pts2, cv::Point2f& offset);
-	void  addAveOffset(std::vector<cv::Point2f>& srcPts, cv::Point2f& offset, std::vector<cv::Point2f>& dstPts);
+	//计算平均位移量
+	cv::Point2f clcAveOffset(std::vector<cv::Point2f>& lastValPts, std::vector<cv::Point2f>&curValPts);
 
+	//用圆滤波
+	std::vector<CPointSmooth>  _points;
+	void  gaussFilter(std::vector<cv::Point>& srcPts, std::vector<cv::Point>& dstPts);
 
-	//�ø�������
+	//用跟踪试试
 	std::vector<Tracker> _trackers;
 };
 

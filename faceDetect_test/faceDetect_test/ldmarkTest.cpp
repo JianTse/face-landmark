@@ -216,7 +216,7 @@ int detectVideo()
 		cv::Rect bgrRect = cv::Rect(0, 0, frame.cols, frame.rows);
 		detectFaceImg(detector, frame, bgrRect, retBgr);
 
-		//cv::Mat frameClone = frame.clone();
+		cv::Mat frameClone = frame.clone();
 
 		char info[1280];
 		std::vector<float> eavs;
@@ -229,6 +229,7 @@ int detectVideo()
 			src_ldmarks = ldmark.run(frame, retBgr[i].rect);
 			double t2 = cvGetTickCount() / (1000.0 * cvGetTickFrequency());
 			ldmarks = m3_ldmark.run(frame, retBgr[i].rect);
+			//sdm_model.sdmProcessOneFaceByDlib(frame, retBgr[i].rect, ldmarks);
 			double t3 = cvGetTickCount() / (1000.0 * cvGetTickFrequency());
 			estimateEav(src_ldmarks, eavs);
 
@@ -245,7 +246,7 @@ int detectVideo()
 			aveDstTime = (t3 - t2) * 0.1;
 
 			//printf("%f, %f\n", t2 - t1, t3 - t2);
-		    cv::rectangle(frame, retBgr[i].rect, cv::Scalar(0,255,0));			
+		    //cv::rectangle(frame, retBgr[i].rect, cv::Scalar(0,255,0));			
 			//cv::rectangle(frame, boundbox, cv::Scalar(0, 0, 255));
 
 			//for (int k = 0; k < ldmarks.size(); k++)
@@ -258,22 +259,22 @@ int detectVideo()
 			}
 			for (int k = 0; k < src_ldmarks.size(); k++)
 			{
-				cv::circle(frame, src_ldmarks[k], 1, cv::Scalar(0, 0, 255), -1);
+				cv::circle(frameClone, src_ldmarks[k], 1, cv::Scalar(0, 0, 255), -1);
 			}
 		}
 
-		if (eavs.size() == 3)
-		{
-			sprintf(info, "%.2f, %.2f, %.2f", eavs[0], eavs[1], eavs[2]);
-			cv::putText(frame, info, cv::Point(10, 50), 1, 1.5, cv::Scalar(0, 0, 255));
-		}		
-		drawEvas(pitchs, yaws, rolls);
+		//if (eavs.size() == 3)
+		//{
+		//	sprintf(info, "%.2f, %.2f, %.2f", eavs[0], eavs[1], eavs[2]);
+		//	cv::putText(frame, info, cv::Point(10, 50), 1, 1.5, cv::Scalar(0, 0, 255));
+		//}		
+		//drawEvas(pitchs, yaws, rolls);
 
 		//sprintf(info, "t:%.2f %.2f", aveSrcTime, aveDstTime);
 		//cv::putText(frame, info, cv::Point(10, 50), 1, 1.5, cv::Scalar(0, 0, 255));
 
 		cv::imshow("img", frame);
-		//cv::imshow("src", frameClone);
+		cv::imshow("src", frameClone);
 		int key = cv::waitKey(1);
 		if ((char)key == ' ')
 		{
@@ -295,12 +296,111 @@ int detectVideo()
 }
 
 
+cv::Rect  findMtcnnBox(std::vector<mtcnnRet>& retBgr, cv::Rect& boundBox)
+{
+	int maxSize = max(boundBox.width, boundBox.height);
+	int cx = boundBox.x + boundBox.width / 2;
+	int cy = boundBox.y + boundBox.height / 2;
+	cv::Rect mtcnnBox = cv::Rect(cx - maxSize / 2, cy - maxSize / 2, maxSize, maxSize);
+	float maxOvp = 0.6;
+	for (int i = 0; i < retBgr.size(); i++)
+	{
+		float ov = getRectOverlap(retBgr[i].rect, mtcnnBox);
+		if (ov > maxOvp)
+		{
+			mtcnnBox = retBgr[i].rect;
+		}
+	}
+	return mtcnnBox;
+}
+
+void  src_beadwalletTest()
+{
+	const char* ldmarkModelDir = "./ldmark-model/ncnn";
+	ShuffleNet_Ldmark  ldmark;
+	ldmark.init(ldmarkModelDir);
+
+	M3_Ldmark m3_ldmark;
+	m3_ldmark.init(ldmarkModelDir);
+
+	//mtcnn
+	const char* mtcnnModelDir = "./mtcnn_model";
+	//MTCNN  detector;
+	MTCNN_NCNN  _detector;
+	_detector.init(mtcnnModelDir);
+
+	ifstream infile("E:/work/data/landmark/beadwallet/samples/test_anno_list.txt");
+	std::vector<std::string> caches;
+	std::string s;
+	while (getline(infile, s))
+	{
+		//从s中解析出整数
+		caches.push_back(s);
+	}
+
+	std::string imgDir = "E:/work/data/landmark/beadwallet/";	
+	//std::string resultFn = "E:/work/data/landmark/beadwallet/test/src.txt";
+	std::string resultFn = "E:/work/data/landmark/beadwallet/test/finetune_240000.txt";
+
+	FILE *fp;
+	if ((fp = fopen(resultFn.c_str(), "w")) == NULL)
+	{
+		return;
+	}
+	std::vector<mtcnnRet> retBgr, retNir;
+	std::vector<cv::Point> ldmark127;
+	std::string pattern = " ";
+	int startId = 1;
+	int endId = 255;
+	for (int i = 0; i < caches.size(); i++)
+	{
+		if (i % 100 == 0)
+		{
+			printf("%d\n", i);
+		}
+		std::vector<std::string>params = split2(caches[i], pattern);
+		std::string imgFn = imgDir + params[0];
+		cv::Mat img = cv::imread(imgFn.c_str());
+
+		startId = 1;
+		endId = 255;		
+		str2Ldmak2(params, startId, endId, ldmark127);
+		cv::Rect box = getBoundingBox(cv::Size(img.cols, img.rows), ldmark127);
+
+		cv::Rect bgrRect = cv::Rect(0, 0, img.cols, img.rows);
+		detectFaceImg(_detector, img, bgrRect, retBgr);
+
+		cv::Rect  mtcnnBox = findMtcnnBox(retBgr, box);
+		std::string  rectStr = rect2Str(mtcnnBox);
+		//std::vector<cv::Point> detect_ldmarks = ldmark.run(img, mtcnnBox);
+		std::vector<cv::Point> detect_ldmarks = m3_ldmark.run(img, mtcnnBox);
+
+		std::string ldStr_int = IntLdmark2Str(detect_ldmarks);
+		std::string retStr_int = params[0] + ldStr_int + rectStr;
+		fprintf(fp, "%s\n", retStr_int.c_str());
+		fflush(fp);
+
+		for (int j = 0; j < ldmark127.size(); j++)
+		{
+			cv::circle(img, ldmark127[j], 2, cv::Scalar(0, 255, 0), -1);
+		}
+		for (int j = 0; j < detect_ldmarks.size(); j++)
+		{
+			cv::circle(img, detect_ldmarks[j], 2, cv::Scalar(0, 0, 255), -1);
+		}
+
+		cv::rectangle(img, mtcnnBox, cv::Scalar(0, 0, 0));
+		cv::imshow("img", img);
+		cv::waitKey(1);
+	}
+	fclose(fp);
+}
 
 
 int main()
 {
 	detectVideo();
-	
+	//src_beadwalletTest();
 
 	return 0;
 }
